@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ผลการทดลอง - EV Charging Research</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f0f1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 30px 40px;
+    border-bottom: 3px solid #00d4ff;
+  }
+  .header h1 { font-size: 28px; color: #00d4ff; margin-bottom: 5px; }
+  .header .subtitle { font-size: 14px; color: #8892b0; }
+
+  .selector-wrapper {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    padding: 22px 25px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .selector-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+  .selector-group label {
+    font-size: 12px; font-weight: 700; color: #00d4ff;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .selector-group select {
+    padding: 11px 15px; border-radius: 8px;
+    border: 1px solid #2a2a4a; background: #0f0f1a; color: #e0e0e0;
+    font-size: 15px; cursor: pointer; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .selector-group select:hover, .selector-group select:focus {
+    border-color: #00d4ff; box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
+  }
+  .selector-group select option { background: #1a1a2e; color: #e0e0e0; }
+
+  .loading {
+    text-align: center; padding: 60px 20px; color: #8892b0; font-size: 18px;
+  }
+  .loading .spinner {
+    display: inline-block; width: 40px; height: 40px;
+    border: 3px solid #2a2a4a; border-top-color: #00d4ff;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px; margin-bottom: 30px;
+  }
+  .stat-card {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a; border-radius: 12px;
+    padding: 20px; text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); border-color: #00d4ff; }
+  .stat-card .label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #8892b0; margin-bottom: 8px;
+  }
+  .stat-card .value { font-size: 24px; font-weight: 700; color: #00d4ff; }
+  .stat-card .unit { font-size: 13px; color: #8892b0; margin-top: 2px; }
+
+  .chart-section {
+    background: #1a1a2e; border: 1px solid #2a2a4a;
+    border-radius: 12px; padding: 25px; margin-bottom: 25px;
+  }
+  .chart-section h2 {
+    font-size: 18px; color: #ccd6f6; margin-bottom: 15px;
+    padding-bottom: 10px; border-bottom: 1px solid #2a2a4a;
+  }
+  .chart-wrapper { position: relative; height: 380px; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+  table.data-table th {
+    background: #16213e; color: #00d4ff; padding: 10px 8px;
+    text-align: center; font-weight: 600; position: sticky; top: 0;
+  }
+  table.data-table td {
+    padding: 6px 8px; text-align: center;
+    border-bottom: 1px solid #2a2a4a; color: #ccd6f6;
+  }
+  table.data-table tr:hover td { background: #16213e; }
+  .table-container { max-height: 450px; overflow-y: auto; border-radius: 8px; border: 1px solid #2a2a4a; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-home { background: #6bcb7722; color: #6bcb77; border: 1px solid #6bcb7744; }
+  .badge-gen  { background: #ffd93d22; color: #ffd93d; border: 1px solid #ffd93d44; }
+
+  .footer { text-align: center; padding: 20px; color: #555; font-size: 12px; }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+  .header { animation: slideInLeft 0.8s ease-out; }
+  .chart-section { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+  .chart-section.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    .chart-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .selector-wrapper { flex-direction: column; align-items: stretch; }
+    .header { padding: 22px 20px; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ผลการทดลอง — EV Charging Research</h1>
+  <div class="subtitle" id="headerSubtitle">
+    วิเคราะห์โปรไฟล์การชาร์จรถยนต์ไฟฟ้า &nbsp;
+    <span class="badge badge-home" id="headerBadge">REAL DATA</span>
+    &nbsp;|&nbsp; <span id="headerSource">กำลังโหลด...</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="selector-wrapper">
+    <div class="selector-group">
+      <label>แหล่งไฟฟ้า</label>
+      <select id="sourceSelector">
+        <option value="home">🏠 ไฟบ้าน (230V AC)</option>
+        <option value="generator">⚙️ เครื่องปั่นไฟ</option>
+      </select>
+    </div>
+    <div class="selector-group">
+      <label>รุ่นรถ</label>
+      <select id="carSelector">
+        <option value="mg">MG ZS EV</option>
+        <option value="rd6">RD6 Riddara</option>
+      </select>
+    </div>
+    <div class="selector-group">
+      <label>กระแสไฟฟ้า</label>
+      <select id="currentSelector"></select>
+    </div>
+  </div>
+
+  <div id="loadingArea" class="loading">
+    <div class="spinner"></div><br>
+    กำลังโหลดข้อมูล...
+  </div>
+
+  <div id="reportArea" style="display:none;">
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">พลังงานรวม (คำนวณ)</div>
+        <div class="value" id="statTotalEnergy">-</div>
+        <div class="unit">kWh</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">พลังงาน Tuya (ส่วนต่าง)</div>
+        <div class="value" id="statTuyaDelta">-</div>
+        <div class="unit">kWh</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">กำลังสูงสุด</div>
+        <div class="value" id="statPeakPower">-</div>
+        <div class="unit">kW</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">กำลังเฉลี่ย</div>
+        <div class="value" id="statAvgPower">-</div>
+        <div class="unit">kW</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">อุณหภูมิสูงสุด</div>
+        <div class="value" id="statTemp">-</div>
+        <div class="unit" id="statTempRise">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">แรงดันเฉลี่ย</div>
+        <div class="value" id="statAvgVoltage">-</div>
+        <div class="unit">V</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">กระแสเฉลี่ย</div>
+        <div class="value" id="statAvgCurrent">-</div>
+        <div class="unit">A</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">ระยะเวลา</div>
+        <div class="value" id="statDuration">-</div>
+        <div class="unit" id="statSamples">-</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>กราฟกำลังไฟฟ้าและอุณหภูมิ</h2>
+      <div class="chart-wrapper"><canvas id="chartPowerTemp"></canvas></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-section">
+        <h2>กราฟแรงดันไฟฟ้า</h2>
+        <div class="chart-wrapper"><canvas id="chartVoltage"></canvas></div>
+      </div>
+      <div class="chart-section">
+        <h2>กราฟกระแสไฟฟ้า</h2>
+        <div class="chart-wrapper"><canvas id="chartCurrent"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-section">
+        <h2>พลังงานสะสม (kWh)</h2>
+        <div class="chart-wrapper"><canvas id="chartEnergy"></canvas></div>
+      </div>
+      <div class="chart-section">
+        <h2>ค่าความต้านทาน (&#8486;)</h2>
+        <div class="chart-wrapper"><canvas id="chartResistance"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>เปรียบเทียบพลังงาน Tuya vs คำนวณ</h2>
+      <div class="chart-wrapper"><canvas id="chartEnergyCompare"></canvas></div>
+    </div>
+
+    <div class="chart-section">
+      <h2 id="dataLogTitle">ข้อมูลดิบ</h2>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>เวลา (นาที)</th>
+              <th>แรงดัน (V)</th>
+              <th>กระแส (A)</th>
+              <th>ความต้านทาน (&#8486;)</th>
+              <th>กำลัง (kW)</th>
+              <th>อุณหภูมิ (&#176;C)</th>
+              <th>อุณหภูมิเพิ่ม (&#176;C)</th>
+              <th>พลังงานคำนวณ (kWh)</th>
+              <th>Tuya Raw (kWh)</th>
+            </tr>
+          </thead>
+          <tbody id="dataTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">ผลการทดลอง EV Charging Research | Dynamic Report</div>
+
+<script>
+var charts = {};
+
+var CSV_FILES = {
+  home: {
+    mg: [
+      { file: 'home_mg_8A.csv',  label: '8A' },
+      { file: 'home_mg_10A.csv', label: '10A' },
+      { file: 'home_mg_13A.csv', label: '13A' },
+      { file: 'home_mg_16A.csv', label: '16A' }
+    ],
+    rd6: [
+      { file: 'home_rd6_8A.csv',  label: '8A' },
+      { file: 'home_rd6_10A.csv', label: '10A' },
+      { file: 'home_rd6_13A.csv', label: '13A' },
+      { file: 'home_rd6_16A.csv', label: '16A' }
+    ]
+  },
+  generator: {
+    mg: [
+      { file: 'gen_mg_8A.csv',  label: '8A' },
+      { file: 'gen_mg_10A.csv', label: '10A' },
+      { file: 'gen_mg_13A.csv', label: '13A' },
+      { file: 'gen_mg_16A.csv', label: '16A' }
+    ],
+    rd6: [
+      { file: 'gen_rd6_8A.csv',  label: '8A' },
+      { file: 'gen_rd6_10A.csv', label: '10A' },
+      { file: 'gen_rd6_13A.csv', label: '13A' },
+      { file: 'gen_rd6_16A.csv', label: '16A' }
+    ]
+  }
+};
+
+var CAR_NAMES = { mg: 'MG ZS EV', rd6: 'RD6 Riddara' };
+var SOURCE_NAMES = { home: 'ไฟบ้าน (230V AC)', generator: 'เครื่องปั่นไฟ' };
+
+function getCurrentFiles() {
+  var source = document.getElementById('sourceSelector').value;
+  var car = document.getElementById('carSelector').value;
+  return CSV_FILES[source][car];
+}
+
+function populateCurrentSelector() {
+  var sel = document.getElementById('currentSelector');
+  sel.innerHTML = '';
+  getCurrentFiles().forEach(function(item) {
+    var opt = document.createElement('option');
+    opt.value = item.file;
+    opt.textContent = item.label;
+    sel.appendChild(opt);
+  });
+}
+
+function updateHeader(fileName, currentLabel) {
+  var car = document.getElementById('carSelector').value;
+  var source = document.getElementById('sourceSelector').value;
+  var badge = document.getElementById('headerBadge');
+  if (source === 'home') {
+    badge.textContent = 'ไฟบ้าน'; badge.className = 'badge badge-home';
+  } else {
+    badge.textContent = 'เครื่องปั่นไฟ'; badge.className = 'badge badge-gen';
+  }
+  document.getElementById('headerSource').textContent =
+    SOURCE_NAMES[source] + ' | ' + CAR_NAMES[car] + ' | กระแส ' + currentLabel + ' | ' + fileName;
+}
+
+function parseCSV(text) {
+  var lines = text.trim().split(/\r?\n/);
+  var header = lines[0];
+  var delimiter = header.indexOf('\t') >= 0 ? '\t' : ',';
+  var keys = header.split(delimiter).map(function(k) { return k.trim(); });
+  var rows = [];
+  for (var i = 1; i < lines.length; i++) {
+    var vals = lines[i].split(delimiter);
+    if (vals.length < keys.length) continue;
+    var row = {};
+    for (var j = 0; j < keys.length; j++) { row[keys[j]] = vals[j].trim(); }
+    rows.push(row);
+  }
+  return rows;
+}
+
+function loadData(fileName, currentLabel) {
+  document.getElementById('loadingArea').style.display = 'block';
+  document.getElementById('reportArea').style.display = 'none';
+  updateHeader(fileName, currentLabel);
+
+  fetch('data/' + fileName)
+    .then(function(res) {
+      if (!res.ok) throw new Error('โหลดไฟล์ไม่สำเร็จ ' + fileName);
+      return res.text();
+    })
+    .then(function(text) {
+      var rows = parseCSV(text);
+      var filteredRows = rows.filter(function(row) {
+        return parseFloat(row['Power(kW)']) > 0 && parseFloat(row['Current(A)']) > 0;
+      });
+      if (filteredRows.length === 0) filteredRows = rows;
+
+      var t = [], p = [], tp = [], e = [], c = [], v = [], r = [], tr = [];
+      filteredRows.forEach(function(row) {
+        t.push(Math.round(parseFloat(row['Time_Min'])));
+        v.push(Math.round(parseFloat(row['Voltage(V)'])));
+        c.push(Math.round(parseFloat(row['Current(A)'])));
+        r.push(Math.round(parseFloat(row['Resistance(Ohm)'])));
+        p.push(Math.round(parseFloat(row['Power(kW)']) * 1000) / 1000);
+        tp.push(Math.round(parseFloat(row['Temp(C)'])));
+        e.push(Math.round(parseFloat(row['Calculated_Energy(kWh)']) * 10) / 10);
+        tr.push(Math.round(parseFloat(row['Tuya_Raw_Energy(kWh)']) * 10) / 10);
+      });
+
+      var totalPoints = t.length;
+      var initialTemp = tp[0];
+      var totalEnergy = e[e.length - 1];
+      var peakPower = Math.max.apply(null, p);
+      var avgPower = p.reduce(function(a, b) { return a + b; }, 0) / p.length;
+      var peakTemp = Math.max.apply(null, tp);
+      var maxTempRise = peakTemp - initialTemp;
+      var avgVoltage = v.reduce(function(a, b) { return a + b; }, 0) / v.length;
+      var avgCurrent = c.reduce(function(a, b) { return a + b; }, 0) / c.length;
+      var durationMin = t[t.length - 1];
+      var tuyaDelta = tr[tr.length - 1] - tr[0];
+
+      document.getElementById('statTotalEnergy').textContent = Math.round(totalEnergy * 10) / 10;
+      document.getElementById('statTuyaDelta').textContent = Math.round(tuyaDelta * 10) / 10;
+      document.getElementById('statPeakPower').textContent = Math.round(peakPower * 1000) / 1000;
+      document.getElementById('statAvgPower').textContent = Math.round(avgPower * 1000) / 1000;
+      document.getElementById('statTemp').textContent = peakTemp + '\u00B0C';
+      document.getElementById('statTempRise').textContent = 'เพิ่ม: +' + Math.round(maxTempRise) + '\u00B0C';
+      document.getElementById('statAvgVoltage').textContent = Math.round(avgVoltage);
+      document.getElementById('statAvgCurrent').textContent = Math.round(avgCurrent);
+      document.getElementById('statDuration').textContent = Math.round(durationMin);
+      document.getElementById('statSamples').textContent = 'นาที (' + totalPoints + ' จุด)';
+      document.getElementById('dataLogTitle').textContent = 'ข้อมูลดิบ (ทั้งหมด ' + totalPoints + ' แถว)';
+
+      var tbody = '';
+      for (var i = 0; i < totalPoints; i++) {
+        var tempRise = Math.round(parseFloat(filteredRows[i]['Temp_Rise(C)']));
+        tbody += '<tr>' +
+          '<td>' + t[i] + '</td>' +
+          '<td>' + v[i] + '</td>' +
+          '<td>' + c[i] + '</td>' +
+          '<td>' + r[i] + '</td>' +
+          '<td>' + Math.round(p[i] * 1000) / 1000 + '</td>' +
+          '<td>' + tp[i] + '</td>' +
+          '<td>+' + tempRise + '</td>' +
+          '<td>' + Math.round(e[i] * 10) / 10 + '</td>' +
+          '<td>' + tr[i] + '</td>' +
+          '</tr>';
+      }
+      document.getElementById('dataTableBody').innerHTML = tbody;
+
+      updateCharts(t, p, tp, e, c, v, r, tr);
+
+      document.getElementById('loadingArea').style.display = 'none';
+      document.getElementById('reportArea').style.display = 'block';
+      initAnimations();
+    })
+    .catch(function(err) {
+      document.getElementById('loadingArea').innerHTML =
+        '<div style="color:#ff6b6b;font-size:16px;">เกิดข้อผิดพลาด: ' + err.message + '</div>';
+    });
+}
+
+function updateCharts(t, p, tp, e, c, v, r, tr) {
+  Object.keys(charts).forEach(function(key) { charts[key].destroy(); });
+
+  Chart.defaults.color = '#8892b0';
+  Chart.defaults.borderColor = '#2a2a4a';
+
+  var baseOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    animation: { duration: 1500, easing: 'easeInOutQuart' },
+    plugins: {
+      legend: { labels: { color: '#ccd6f6', padding: 15 } },
+      tooltip: {
+        backgroundColor: '#1a1a2e', titleColor: '#00d4ff', bodyColor: '#ccd6f6',
+        borderColor: '#2a2a4a', borderWidth: 1, padding: 10,
+        callbacks: { label: function(context) {
+          var label = context.dataset.label || '';
+          return label + ': ' + (Math.round(context.parsed.y * 10) / 10);
+        } }
+      }
+    }
+  };
+
+  function xScale() {
+    return { title: { display: true, text: 'เวลา (นาที)', color: '#8892b0' }, ticks: { color: '#8892b0' }, grid: { color: '#1e1e3a' } };
+  }
+  function yScale(label, color) {
+    return { type: 'linear', position: 'left', title: { display: true, text: label, color: color || '#8892b0' }, ticks: { color: color || '#8892b0' }, grid: { color: '#1e1e3a' } };
+  }
+
+  charts.powerTemp = new Chart(document.getElementById('chartPowerTemp'), {
+    type: 'line',
+    data: { labels: t, datasets: [
+      { label: 'กำลังไฟฟ้า (kW)', data: p, borderColor: '#00d4ff', backgroundColor: 'rgba(0,212,255,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+      { label: 'อุณหภูมิ (\u00b0C)', data: tp, borderColor: '#ff6b6b', backgroundColor: 'rgba(255,107,107,0.1)', borderWidth: 2, borderDash: [5, 3], fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y1' }
+    ] },
+    options: Object.assign({}, baseOpts, {
+      scales: {
+        x: xScale(),
+        y: { type: 'linear', position: 'left', title: { display: true, text: 'กำลังไฟฟ้า (kW)', color: '#00d4ff' }, ticks: { color: '#00d4ff' }, grid: { color: '#1e1e3a' } },
+        y1: { type: 'linear', position: 'right', title: { display: true, text: 'อุณหภูมิ (\u00b0C)', color: '#ff6b6b' }, ticks: { color: '#ff6b6b' }, grid: { drawOnChartArea: false } }
+      }
+    })
+  });
+
+  charts.voltage = new Chart(document.getElementById('chartVoltage'), {
+    type: 'line',
+    data: { labels: t, datasets: [{ label: 'แรงดันไฟฟ้า (V)', data: v, borderColor: '#6bcb77', backgroundColor: 'rgba(107,203,119,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
+    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('แรงดัน (V)', '#6bcb77') } })
+  });
+
+  charts.current = new Chart(document.getElementById('chartCurrent'), {
+    type: 'line',
+    data: { labels: t, datasets: [{ label: 'กระแสไฟฟ้า (A)', data: c, borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
+    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('กระแส (A)', '#a855f7') } })
+  });
+
+  charts.energy = new Chart(document.getElementById('chartEnergy'), {
+    type: 'line',
+    data: { labels: t, datasets: [{ label: 'พลังงานสะสม (kWh)', data: e, borderColor: '#ffd93d', backgroundColor: 'rgba(255,217,61,0.15)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
+    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('พลังงาน (kWh)', '#ffd93d') } })
+  });
+
+  charts.resistance = new Chart(document.getElementById('chartResistance'), {
+    type: 'line',
+    data: { labels: t, datasets: [{ label: 'ความต้านทาน (\u2126)', data: r, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
+    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('ความต้านทาน (\u2126)', '#f97316') } })
+  });
+
+  var eNorm = e.map(function(val) { return Math.round((val - e[0]) * 10) / 10; });
+  var trNorm = tr.map(function(val) { return Math.round((val - tr[0]) * 10) / 10; });
+
+  charts.energyCompare = new Chart(document.getElementById('chartEnergyCompare'), {
+    type: 'line',
+    data: { labels: t, datasets: [
+      { label: 'พลังงานคำนวณ (kWh)', data: eNorm, borderColor: '#ffd93d', backgroundColor: 'rgba(255,217,61,0.1)', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+      { label: 'พลังงาน Tuya Raw (kWh)', data: trNorm, borderColor: '#4d96ff', backgroundColor: 'rgba(77,150,255,0.1)', borderWidth: 2, borderDash: [5, 3], fill: false, tension: 0.3, pointRadius: 0, yAxisID: 'y1' }
+    ] },
+    options: Object.assign({}, baseOpts, {
+      scales: {
+        x: xScale(),
+        y: { type: 'linear', min: 0, position: 'left', title: { display: true, text: 'พลังงานคำนวณ (kWh)', color: '#ffd93d' }, ticks: { color: '#ffd93d' }, grid: { color: '#1e1e3a' } },
+        y1: { type: 'linear', min: 0, position: 'right', title: { display: true, text: 'พลังงาน Tuya Raw (kWh)', color: '#4d96ff' }, ticks: { color: '#4d96ff' }, grid: { drawOnChartArea: false } }
+      }
+    })
+  });
+}
+
+function initAnimations() {
+  var sections = document.querySelectorAll('.chart-section');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  sections.forEach(function(s) { observer.observe(s); });
+}
+
+function reload() {
+  var sel = document.getElementById('currentSelector');
+  var item = getCurrentFiles().find(function(f) { return f.file === sel.value; }) || getCurrentFiles()[0];
+  loadData(item.file, item.label);
+}
+
+document.getElementById('sourceSelector').addEventListener('change', function() { populateCurrentSelector(); reload(); });
+document.getElementById('carSelector').addEventListener('change', function() { populateCurrentSelector(); reload(); });
+document.getElementById('currentSelector').addEventListener('change', reload);
+
+window.addEventListener('DOMContentLoaded', function() {
+  populateCurrentSelector();
+  reload();
+});
+</script>
+
+</body>
+</html>

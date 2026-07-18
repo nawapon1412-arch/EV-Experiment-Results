@@ -42,7 +42,7 @@
 <div class="header">
   <div>
     <h1>การวิเคราะห์ — EV Charging Research</h1>
-    <div class="subtitle">Loss / การลดของแบต / เปรียบเทียบ ไฟบ้าน vs เครื่องปั่นไฟ (η ผันตามกระแส)</div>
+    <div class="subtitle">Loss / การลดของแบต / เปรียบเทียบ ไฟบ้าน vs เครื่องปั่นไฟ</div>
   </div>
   <a href="index.html" class="nav-btn">← กลับหน้าแดชบอร์ด</a>
 </div>
@@ -50,7 +50,6 @@
   <div class="info-box">
     <strong>พารามิเตอร์:</strong><br>
     <span>แบตเครื่องปั่นไฟ: <strong>72V 100Ah (7.2 kWh)</strong></span> &nbsp;|&nbsp;
-    <span>η <strong>ผันตามกระแส</strong>: 8A→78%, 10A→75%, 13A→71%, 16A→68%</span> &nbsp;|&nbsp;
     <span>MG ZS EV: <strong>50.3 kWh</strong></span> &nbsp;|&nbsp;
     <span>RD6: <strong>63 kWh</strong></span> &nbsp;|&nbsp;
     <span>ค่าไฟ: <strong>4.5 บาท/kWh</strong></span> &nbsp;|&nbsp;
@@ -61,37 +60,36 @@
   <div class="sub-title">MG ZS EV (แบตรถ 50.3 kWh)</div>
   <table>
     <tr><th>กระแส</th><th>P ออก (kW)</th><th>E รถได้ (kWh)</th><th>E แบตใช้ (kWh)</th><th>Loss (kWh)</th><th>SOC ลด (%)</th><th>ประมาณการแบตหมด (ชม.)</th><th>รถ +SOC (%)</th></tr>
-<tr><td>8A (η=78%)</td><td>1.85</td><td>1.846</td><td>2.367</td><td>0.521</td><td>32.9</td><td>3.04</td><td>3.7</td></tr>
-<tr><td>10A (η=75%)</td><td>2.30</td><td>2.298</td><td>3.064</td><td>0.766</td><td>42.6</td><td>2.35</td><td>4.6</td></tr>
-<tr><td>13A (η=71%)</td><td>2.97</td><td>2.962</td><td>4.171</td><td>1.210</td><td>57.9</td><td>1.72</td><td>5.9</td></tr>
-<tr><td>16A (η=68%)</td><td>3.62</td><td>3.613</td><td>5.313</td><td>1.700</td><td>73.8</td><td>1.35</td><td>7.2</td></tr>
+<tr><td>8A</td><td>1.85</td><td>1.846</td><td>2.367</td><td>0.521</td><td>32.9</td><td>3.04</td><td>3.7</td></tr>
+<tr><td>10A</td><td>2.30</td><td>2.298</td><td>3.064</td><td>0.766</td><td>42.6</td><td>2.35</td><td>4.6</td></tr>
+<tr><td>13A</td><td>2.97</td><td>2.962</td><td>4.171</td><td>1.210</td><td>57.9</td><td>1.72</td><td>5.9</td></tr>
+<tr><td>16A</td><td>3.62</td><td>3.613</td><td>5.313</td><td>1.700</td><td>73.8</td><td>1.35</td><td>7.2</td></tr>
 
   </table>
   <div class="sub-title">RD6 (แบตรถ 63 kWh)</div>
   <table>
     <tr><th>กระแส</th><th>P ออก (kW)</th><th>E รถได้ (kWh)</th><th>E แบตใช้ (kWh)</th><th>Loss (kWh)</th><th>SOC ลด (%)</th><th>ประมาณการแบตหมด (ชม.)</th><th>รถ +SOC (%)</th></tr>
-<tr><td>8A (η=78%)</td><td>1.85</td><td>1.846</td><td>2.367</td><td>0.521</td><td>32.9</td><td>3.04</td><td>2.9</td></tr>
-<tr><td>10A (η=75%)</td><td>2.30</td><td>2.298</td><td>3.064</td><td>0.766</td><td>42.6</td><td>2.34</td><td>3.6</td></tr>
-<tr><td>13A (η=71%)</td><td>2.97</td><td>2.962</td><td>4.172</td><td>1.210</td><td>57.9</td><td>1.72</td><td>4.7</td></tr>
-<tr><td>16A (η=68%)</td><td>3.61</td><td>3.613</td><td>5.313</td><td>1.700</td><td>73.8</td><td>1.36</td><td>5.7</td></tr>
+<tr><td>8A</td><td>1.85</td><td>1.846</td><td>2.367</td><td>0.521</td><td>32.9</td><td>3.04</td><td>2.9</td></tr>
+<tr><td>10A</td><td>2.30</td><td>2.298</td><td>3.064</td><td>0.766</td><td>42.6</td><td>2.34</td><td>3.6</td></tr>
+<tr><td>13A</td><td>2.97</td><td>2.962</td><td>4.172</td><td>1.210</td><td>57.9</td><td>1.72</td><td>4.7</td></tr>
+<tr><td>16A</td><td>3.61</td><td>3.613</td><td>5.313</td><td>1.700</td><td>73.8</td><td>1.36</td><td>5.7</td></tr>
 
   </table>
 
   <div class="chart-grid">
-    <div class="chart-card"><img src="img/12_efficiency_curve.png" alt="Efficiency"><div class="caption">รูปที่ 12: η ลดลงตามกระแส</div></div>
     <div class="chart-card"><img src="img/01_SOC_drop.png" alt="SOC drop"><div class="caption">รูปที่ 1: SOC ลดลง (ทดลอง 1 ชม.)</div></div>
     <div class="chart-card"><img src="img/03_loss_breakdown.png" alt="Loss"><div class="caption">รูปที่ 3: Loss เพิ่มตามกระแส</div></div>
     <div class="chart-card"><img src="img/02_runtime.png" alt="Runtime"><div class="caption">รูปที่ 2: ประมาณการแบตหมด</div></div>
-    <div class="chart-card full"><img src="img/08_soc_vs_time.png" alt="SOC vs time"><div class="caption">รูปที่ 8: SOC ลดตามเวลา</div></div>
+    <div class="chart-card"><img src="img/08_soc_vs_time.png" alt="SOC vs time"><div class="caption">รูปที่ 8: SOC ลดตามเวลา</div></div>
   </div>
 
   <div class="section-title">2. เปรียบเทียบ ไฟบ้าน vs เครื่องปั่นไฟ</div>
   <table>
     <tr><th>กระแส</th><th>ไฟบ้าน E (kWh)</th><th>ไฟบ้าน ราคา</th><th>เครื่องปั่นไฟ Eเข้า (kWh)</th><th>เครื่องปั่นไฟ ราคา</th><th>เพิ่ม (บาท)</th></tr>
-<tr><td>8A (η=78%)</td><td>1.834</td><td>8.25</td><td>2.367</td><td>10.65</td><td class="diff">+2.40</td></tr>
-<tr><td>10A (η=75%)</td><td>2.297</td><td>10.34</td><td>3.064</td><td>13.79</td><td class="diff">+3.45</td></tr>
-<tr><td>13A (η=71%)</td><td>2.878</td><td>12.95</td><td>4.171</td><td>18.77</td><td class="diff">+5.82</td></tr>
-<tr><td>16A (η=68%)</td><td>3.201</td><td>14.40</td><td>5.313</td><td>23.91</td><td class="diff">+9.50</td></tr>
+<tr><td>8A</td><td>1.834</td><td>8.25</td><td>2.367</td><td>10.65</td><td class="diff">+2.40</td></tr>
+<tr><td>10A</td><td>2.297</td><td>10.34</td><td>3.064</td><td>13.79</td><td class="diff">+3.45</td></tr>
+<tr><td>13A</td><td>2.878</td><td>12.95</td><td>4.171</td><td>18.77</td><td class="diff">+5.82</td></tr>
+<tr><td>16A</td><td>3.201</td><td>14.40</td><td>5.313</td><td>23.91</td><td class="diff">+9.50</td></tr>
 
   </table>
   <div class="chart-grid">
@@ -112,9 +110,8 @@
   <div class="findings">
     <h3>ข้อค้นพบหลัก</h3>
     <ul>
-      <li><strong>η ไม่คงที่ — ลดลงตามกระแส:</strong> 8A→η78% (Loss 22%) แต่ 16A→η68% (Loss 32%) เพราะ I²R loss</li>
+      <li><strong>กระแสสูง → Loss สูงขึ้น:</strong> 8A Loss=0.52 kWh แต่ 16A Loss=1.70 kWh (เพิ่ม 3.3 เท่า)</li>
       <li><strong>กระแสสูง → แบตลดเร็วกว่า:</strong> ในการทดลอง 1 ชม.: 8A ลด 33%, 16A ลด 74%</li>
-      <li><strong>Loss ต่างกันทุกกระแส:</strong> 8A Loss=0.52 kWh แต่ 16A Loss=1.70 kWh (เพิ่ม 3.3 เท่า)</li>
       <li><strong>ต้นทุนเครื่องปั่นไฟสูงกว่า:</strong> เพิ่ม 2.40 ถึง 9.51 บาท ต่อทดลอง 1 ชม.</li>
       <li><strong>ชาร์จไม่เต็ม:</strong> แบต 7.2 kWh เทียบรถ 50-63 kWh เหมาะใช้ฉุกเฉิน (เพิ่ม SOC รถ 3-7%)</li>
       <li><strong>แรงดันแกว่ง:</strong> ไฟบ้านเสถียร 230V ส่วนเครื่องปั่นไฟแกว่ง 225-232V + อุณหภูมิขึ้น 25→34-44°C</li>

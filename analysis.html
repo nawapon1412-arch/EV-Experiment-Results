@@ -102,7 +102,7 @@
 
   <div class="sub-title">MG ZS EV (แบตรถ 50.3 kWh)</div>
   <table>
-    <tr><th>กระแส</th><th>P ออก (kW)</th><th>E รถได้ (kWh)</th><th>E แบตใช้ (kWh)</th><th>Loss (kWh)</th><th>SOC ลด (%)</th><th>แบตหมด (ชม.)</th><th>รถ +SOC (%)</th></tr>
+    <tr><th>กระแส</th><th>P ออก (kW)</th><th>E รถได้ (kWh)</th><th>E แบตใช้ (kWh)</th><th>Loss (kWh)</th><th>SOC ลด (%)</th><th>ประมาณการแบตหมด (ชม.)</th><th>รถ +SOC (%)</th></tr>
     <tr><td>8A</td><td>1.85</td><td>1.846</td><td>2.638</td><td>0.791</td><td>36.6</td><td>2.73</td><td>3.7</td></tr>
     <tr><td>10A</td><td>2.30</td><td>2.298</td><td>3.283</td><td>0.985</td><td>45.6</td><td>2.19</td><td>4.6</td></tr>
     <tr><td>13A</td><td>2.97</td><td>2.962</td><td>4.231</td><td>1.269</td><td>58.8</td><td>1.70</td><td>5.9</td></tr>
@@ -111,7 +111,7 @@
 
   <div class="sub-title">Riddara RD6 (แบตรถ 63 kWh)</div>
   <table>
-    <tr><th>กระแส</th><th>P ออก (kW)</th><th>E รถได้ (kWh)</th><th>E แบตใช้ (kWh)</th><th>Loss (kWh)</th><th>SOC ลด (%)</th><th>แบตหมด (ชม.)</th><th>รถ +SOC (%)</th></tr>
+    <tr><th>กระแส</th><th>P ออก (kW)</th><th>E รถได้ (kWh)</th><th>E แบตใช้ (kWh)</th><th>Loss (kWh)</th><th>SOC ลด (%)</th><th>ประมาณการแบตหมด (ชม.)</th><th>รถ +SOC (%)</th></tr>
     <tr><td>8A</td><td>1.85</td><td>1.846</td><td>2.637</td><td>0.791</td><td>36.6</td><td>2.73</td><td>2.9</td></tr>
     <tr><td>10A</td><td>2.30</td><td>2.298</td><td>3.283</td><td>0.985</td><td>45.6</td><td>2.19</td><td>3.6</td></tr>
     <tr><td>13A</td><td>2.97</td><td>2.962</td><td>4.232</td><td>1.269</td><td>58.8</td><td>1.70</td><td>4.7</td></tr>
@@ -119,7 +119,7 @@
   </table>
 
   <div class="chart-grid">
-    <div class="chart-card"><img src="img/01_SOC_drop.png" alt="SOC drop"><div class="caption">รูปที่ 1: SOC แบตเครื่องปั่นไฟลดลงต่อชม.</div></div>
+    <div class="chart-card"><img src="img/01_SOC_drop.png" alt="SOC drop"><div class="caption">รูปที่ 1: SOC แบตเครื่องปั่นไฟลดลง (ทดลอง 1 ชม.)</div></div>
     <div class="chart-card"><img src="img/02_runtime.png" alt="Runtime"><div class="caption">รูปที่ 2: เวลาก่อนแบตหมด</div></div>
     <div class="chart-card"><img src="img/03_loss_breakdown.png" alt="Loss"><div class="caption">รูปที่ 3: พลังงานรถได้ vs Loss</div></div>
     <div class="chart-card"><img src="img/08_soc_vs_time.png" alt="SOC vs time"><div class="caption">รูปที่ 8: SOC ลดตามเวลา</div></div>
@@ -157,9 +157,9 @@
   <div class="findings">
     <h3>ข้อค้นพบหลัก</h3>
     <ul>
-      <li><strong>กระแสยิ่งสูง → แบตหมดยิ่งเร็ว:</strong> 8A แบตลด 37%/ชม. (ใช้ได้ ~2 ชม. 44 น.) แต่ 16A ลด 72%/ชม. (แค่ ~1 ชม. 24 น.)</li>
+      <li><strong>กระแสยิ่งสูง → แบตลดยิ่งเร็ว:</strong> ในการทดลอง 1 ชม.: 8A แบตลด 37%, 16A ลด 72%</li>
       <li><strong>Trade-off:</strong> กระแสสูงชาร์จเร็วแต่แบตหมดเร็ว ต้องเลือกตามความเหมาะสม</li>
-      <li><strong>ชาร์จไม่เต็ม:</strong> แบต 7.2 kWh เทียบรถ (50-63 kWh) เหมาะใช้ฉุกเฉิน (เพิ่ม SOC รถ 3-7%/ชม.)</li>
+      <li><strong>ชาร์จไม่เต็ม:</strong> แบต 7.2 kWh เทียบรถ (50-63 kWh) เหมาะใช้ฉุกเฉิน (เพิ่ม SOC รถ 3-7% ในทดลอง 1 ชม.)</li>
       <li><strong>Loss 30% ทุกกระแส:</strong> แต่ Loss เป็น kWh เพิ่มตามกระแส (0.79 → 1.55 kWh)</li>
       <li><strong>ต้นทุนเครื่องปั่นไฟสูงกว่า ~35-40%:</strong> เพราะ Loss 30% + ดึงพลังงานจากแบตมากกว่า</li>
       <li><strong>แรงดันแกว่ง:</strong> ไฟบ้านเสถียร 230V ส่วนเครื่องปั่นไฟแกว่ง 225-232V + อุณหภูมิขึ้น 25→34-44°C</li>

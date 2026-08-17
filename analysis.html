@@ -197,24 +197,142 @@
   <p class="caption">เครื่องปั่นไฟจ่ายกำลังได้ใกล้เคียงไฟบ้านทุกกระแส (ต่างกัน &lt;2%)</p>
 </div>
 
-<!-- ================= 2. SOC ================= -->
+<!-- ================= 2. SOC (CSS bars) ================= -->
 <div class="section">
-  <h2>2. SOC รถที่เพิ่มขึ้น (ทั้งสองคัน)</h2>
-  <p class="desc">1 ชม. ทั้งสองแหล่งให้ SOC เท่ากัน | MG เพิ่มมากกว่า RD6 เพราะแบตเล็กกว่า (50.3 vs 63 kWh)</p>
-  <div class="chart-full">
-    <img src="img/web_14_soc.png" alt="SOC both cars">
-    <div class="caption">SOC เพิ่มใน 1 ชม.: MG 2.9–4.9% | RD6 2.2–3.9%</div>
+  <h2>2. SOC รถที่เพิ่มขึ้นใน 1 ชม.</h2>
+  <p class="desc">SOC = แบตรถเพิ่มขึ้นกี่ % หลังชาร์จ 1 ชม. จากเครื่องปั่นไฟ</p>
+  <div class="csschart">
+    <div class="cchart-title" style="color:#4d96ff">🚗 MG ZS EV <span style="font-size:0.65em;color:#8b949e;font-weight:400">(แบตรถ 50.3 kWh)</span></div>
+    <div class="brow">
+      <div class="blabel">8A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:46%; background:#4d96ff"><span>+2.9%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">10A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:55%; background:#4d96ff"><span>+3.4%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">13A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:67%; background:#4d96ff"><span>+4.2%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">16A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:79%; background:#4d96ff"><span>+4.9%</span></div>
+      </div>
+    </div>
   </div>
+  <div class="csschart">
+    <div class="cchart-title" style="color:#ff6b6b">🛻 RD6 <span style="font-size:0.65em;color:#8b949e;font-weight:400">(แบตรถ 63 kWh)</span></div>
+    <div class="brow">
+      <div class="blabel">8A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:36%; background:#ff6b6b"><span>+2.3%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">10A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:44%; background:#ff6b6b"><span>+2.7%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">13A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:53%; background:#ff6b6b"><span>+3.3%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">16A</div>
+      <div class="btrack">
+        <div class="bname">SOC เพิ่ม</div>
+        <div class="bar" style="width:62%; background:#ff6b6b"><span>+3.8%</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="caption">MG เพิ่มมากกว่า RD6 เพราะแบตเล็กกว่า — พลังงานเท่ากันแต่เทลงถังเล็กกว่า</p>
 </div>
 
-<!-- ================= 3. แบตเครื่องปั่นไฟ ================= -->
+<!-- ================= 3. แบตเหลือ (CSS bars) ================= -->
 <div class="section">
-  <h2>3. แบต 7.2 kWh เหลือเท่าไหร่หลังชาร์จ 1 ชม.</h2>
-  <p class="desc">โซนแดง = ต่ำกว่า 20% ต้องชาร์จแบตคืน | ที่ 16A เหลือเพียง ~35% ทั้งสองคัน</p>
-  <div class="chart-full">
-    <img src="img/web_15_batt.png" alt="Battery remaining">
-    <div class="caption">SOC แบตคงเหลือ: MG 16A เหลือ 35% | RD6 เหลือ 36%</div>
+  <h2>3. แบตเครื่องปั่นไฟ 7.2 kWh เหลือกี่ %</h2>
+  <p class="desc">เริ่ม 100% → ชาร์จยิ่งแรง หมดยิ่งเร็ว | ต่ำกว่า 40% (สีแดง) ใกล้โซนต้องชาร์จแบตคืน</p>
+  <div class="csschart">
+    <div class="cchart-title" style="color:#4d96ff">🚗 MG ZS EV</div>
+    <div class="brow">
+      <div class="blabel">8A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:57%; background:#4d96ff"><span>67%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">10A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:51%; background:#4d96ff"><span>59%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">13A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:40%; background:#4d96ff"><span>47%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">16A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:30%; background:#ff6b6b"><span>35%</span></div>
+      </div>
+    </div>
   </div>
+  <div class="csschart">
+    <div class="cchart-title" style="color:#ff6b6b">🛻 RD6</div>
+    <div class="brow">
+      <div class="blabel">8A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:58%; background:#ff6b6b"><span>67%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">10A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:51%; background:#ff6b6b"><span>59%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">13A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:41%; background:#ff6b6b"><span>48%</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">16A</div>
+      <div class="btrack">
+        <div class="bname">เหลือ</div>
+        <div class="bar" style="width:31%; background:#ff6b6b"><span>36%</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="caption">16A ใช้ 1 ชม. แบตเหลือแค่ ~35% ทั้งสองคัน</p>
 </div>
 
 <!-- ================= 4. อุณหภูมิ ================= -->
@@ -314,7 +432,8 @@
 
 <footer>
   โครงงาน การศึกษาเครื่องปั่นไฟฉุกเฉินที่ใช้แบตเตอรี่สำหรับรถยนต์ไฟฟ้า<br>
-  ทดสอบจริง MG ZS EV + RD6 • กระแส 8/10/13/16A • นาน 1 ชม. ต่อกรณี
+  ทดสอบจริง MG ZS EV + RD6 • กระแส 8/10/13/16A • นาน 1 ชม. ต่อกรณี<br>
+  <span style="color:#484f58">v3-css</span>
 </footer>
 
 </div>

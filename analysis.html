@@ -222,6 +222,34 @@
     </div>
   </div>
 
+  <!-- Section 7: MG vs RD6 -->
+  <div class="section">
+    <h2>7. เปรียบเทียบรถทั้งสองคัน: MG ZS EV vs RD6 🚗 vs 🚗</h2>
+    <p class="desc">
+      MG ZS EV (แบต 50.3 kWh) vs RD6 (แบต 63 kWh) ชาร์จจากเครื่องปั่นไฟเหมือนกัน<br>
+      <strong style="color:#00d4ff;">ข้อสังเกต:</strong> MG รับพลังงานได้มากกว่าเล็กน้อย + SOC เพิ่มเร็วกว่าเพราะแบตเล็กกว่า
+    </p>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <img src="img/web_13_power.png" alt="Power MG vs RD6">
+        <div class="caption">กำลังไฟฟ้าเฉลี่ย: MG สูงกว่า RD6 เล็กน้อยทุกกระแส</div>
+      </div>
+      <div class="chart-card">
+        <img src="img/web_14_soc.png" alt="SOC MG vs RD6">
+        <div class="caption">SOC รถเพิ่ม: MG เพิ่มมากกว่า เพราะแบต 50.3 kWh เล็กกว่า 63 kWh</div>
+      </div>
+      <div class="chart-card">
+        <img src="img/web_15_batt.png" alt="Battery drain MG vs RD6">
+        <div class="caption">แบตเครื่องปั่นไฟลด: ใกล้เคียงกัน (MG ใช้มากกว่าเล็กน้อย)</div>
+      </div>
+      <div class="chart-card">
+        <img src="img/web_16_temp.png" alt="Temp MG vs RD6">
+        <div class="caption">อุณหภูมิ: RD6 ร้อนกว่า MG ~1°C ทุกกระแส</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Findings -->
   <div class="findings">
     <h3>สรุปข้อค้นพบ</h3>
@@ -232,6 +260,7 @@
       <li><strong>SOC รถเพิ่มช้า:</strong> 1 ชม. ที่ 16A เพิ่ม SOC แค่ 4.9% — ต้องใช้ 84 นาที ถึงจะ +10%</li>
       <li><strong>เครื่องปั่นไฟแพงกว่าไฟบ้าน:</strong> 16A แพงกว่า 6.6 บาท/ชม. เพราะสูญเสียพลังงานที่มอเตอร์+เครื่องปั่นไฟ</li>
       <li><strong>ถูกกว่าเครื่องปั่นไฟน้ำมัน ~2.7 เท่า:</strong> น้ำมันเบนซินเสีย 29.5-57.8 บาท/ชม. แต่แบตเสียเพียง 10.7-21.0 บาท/ชม. (ประหยัด 18.8-36.8 บาท/ชม.)</li>
+      <li><strong>MG vs RD6:</strong> MG รับกำลังไฟมากกว่าเล็กน้อย (3.61 vs 3.55 kW ที่ 16A) และ SOC เพิ่มเร็วกว่า (4.9% vs 3.8% ที่ 16A) เพราะแบตเล็กกว่า (50.3 vs 63 kWh)</li>
       <li><strong>เหมาะใช้ฉุกเฉิน:</strong> แบต 7.2 kWh เล็กเทียบรถ 50-63 kWh — ชาร์จฉุกเฉินพอขับไปสถานีชาร์จใกล้สุด</li>
     </ul>
   </div>

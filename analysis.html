@@ -205,6 +205,23 @@
     </div>
   </div>
 
+  <!-- Section 6: Gasoline comparison -->
+  <div class="section">
+    <h2>6. เทียบกับเครื่องปั่นไฟน้ำมัน ⛽</h2>
+    <p class="desc">
+      ถ้าใช้เครื่องปั่นไฟเบนซิน 5 kW แทน (อัตรากินน้ำมัน 0.4 ลิตร/kWh, น้ำมัน 40 บาท/ลิตร)<br>
+      <strong style="color:#ff6b6b;">เครื่องปั่นไฟน้ำมันแพงกว่าเครื่องปั่นไฟแบต ~2.7 เท่า!</strong>
+    </p>
+    <div class="chart-full">
+      <img src="img/web_11_oil.png" alt="Oil vs Battery">
+      <div class="caption">ต้นทุน 3 แหล่งพลังงาน: ไฟบ้าน vs แบต vs น้ำมัน (บาท/ชม.)</div>
+    </div>
+    <div class="chart-full">
+      <img src="img/web_12_oil_table.png" alt="Oil table">
+      <div class="caption">ตารางคำนวณ: ลิตร = E_AC × 0.4 | บาท = ลิตร × 40</div>
+    </div>
+  </div>
+
   <!-- Findings -->
   <div class="findings">
     <h3>สรุปข้อค้นพบ</h3>
@@ -214,6 +231,7 @@
       <li><strong>แบต 7.2 kWh หมดเร็ว:</strong> ชาร์จ 16A แค่ 1 ชม. → แบตลด 65% (เหลือ 35%)</li>
       <li><strong>SOC รถเพิ่มช้า:</strong> 1 ชม. ที่ 16A เพิ่ม SOC แค่ 4.9% — ต้องใช้ 84 นาที ถึงจะ +10%</li>
       <li><strong>เครื่องปั่นไฟแพงกว่าไฟบ้าน:</strong> 16A แพงกว่า 6.6 บาท/ชม. เพราะสูญเสียพลังงานที่มอเตอร์+เครื่องปั่นไฟ</li>
+      <li><strong>ถูกกว่าเครื่องปั่นไฟน้ำมัน ~2.7 เท่า:</strong> น้ำมันเบนซินเสีย 29.5-57.8 บาท/ชม. แต่แบตเสียเพียง 10.7-21.0 บาท/ชม. (ประหยัด 18.8-36.8 บาท/ชม.)</li>
       <li><strong>เหมาะใช้ฉุกเฉิน:</strong> แบต 7.2 kWh เล็กเทียบรถ 50-63 kWh — ชาร์จฉุกเฉินพอขับไปสถานีชาร์จใกล้สุด</li>
     </ul>
   </div>

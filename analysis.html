@@ -3,267 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>วิเคราะห์ - EV Charging Research</title>
+<title>วิเคราะห์ผลการทดลอง — เครื่องปั่นไฟฉุกเฉิน EV (MG ZS EV + RD6)</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI',Tahoma,sans-serif; background:#0f0f1a; color:#e0e0e0; min-height:100vh; }
-  .header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); padding:30px 40px; border-bottom:3px solid #00d4ff; display:flex; justify-content:space-between; align-items:center; }
-  .header h1 { font-size:24px; color:#00d4ff; }
-  .header .subtitle { font-size:13px; color:#8892b0; margin-top:4px; }
-  .nav-btn { padding:10px 22px; border-radius:8px; border:1px solid #00d4ff; background:rgba(0,212,255,0.1); color:#00d4ff; font-size:14px; text-decoration:none; cursor:pointer; font-weight:600; }
-  .container { max-width:1100px; margin:0 auto; padding:30px 20px; }
-
-  .intro { background:linear-gradient(145deg,#1a1a2e,#16213e); border:1px solid #2a2a4a; border-left:4px solid #00d4ff; border-radius:12px; padding:24px 28px; margin-bottom:30px; }
-  .intro h2 { color:#00d4ff; font-size:18px; margin-bottom:12px; }
-  .intro p { font-size:14px; line-height:1.9; color:#ccd6f6; }
-  .intro strong { color:#00d4ff; }
-
-  .system-box { background:#1a1a2e; border:1px solid #2a2a4a; border-radius:10px; padding:20px; margin-bottom:30px; text-align:center; }
-  .system-box .flow { font-size:15px; color:#ccd6f6; line-height:2.2; }
-  .system-box .arrow { color:#00d4ff; font-weight:bold; margin:0 6px; }
-  .system-box .eta { font-size:12px; color:#8892b0; }
-
-  .section { margin-bottom:40px; }
-  .section h2 { font-size:20px; color:#00d4ff; margin-bottom:8px; padding-left:14px; border-left:5px solid #00d4ff; }
-  .section .desc { font-size:14px; color:#8892b0; margin:0 0 16px 19px; line-height:1.6; }
-
-  .chart-full { background:#1a1a2e; border:1px solid #2a2a4a; border-radius:12px; padding:16px; margin-bottom:20px; }
-  .chart-full img { width:100%; border-radius:8px; }
-  .chart-full .caption { font-size:13px; color:#8892b0; margin-top:10px; text-align:center; }
-
-  .chart-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
-  .chart-card { background:#1a1a2e; border:1px solid #2a2a4a; border-radius:12px; padding:16px; }
+  body { font-family:'Segoe UI',Tahoma,sans-serif; background:#0d1117; color:#e6edf3; line-height:1.7; }
+  .container { max-width:1200px; margin:0 auto; padding:30px 20px; }
+  header { text-align:center; padding:50px 20px 30px; background:linear-gradient(135deg,#0d1117 60%,#161b22); border-bottom:1px solid #21262d; }
+  header h1 { font-size:2em; background:linear-gradient(90deg,#4d96ff,#ff6b6b); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  header p { color:#8b949e; margin-top:10px; }
+  .badge { display:inline-block; margin:6px 4px; padding:5px 16px; border-radius:20px; font-size:0.85em; font-weight:600; }
+  .b-mg { background:rgba(77,150,255,0.15); color:#4d96ff; border:1px solid #4d96ff; }
+  .b-rd { background:rgba(255,107,107,0.15); color:#ff6b6b; border:1px solid #ff6b6b; }
+  .section { margin:35px 0; }
+  .section h2 { font-size:1.45em; color:#58a6ff; border-left:4px solid #58a6ff; padding-left:14px; margin-bottom:8px; }
+  .desc { color:#8b949e; font-size:0.95em; margin-bottom:18px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-bottom:22px; }
+  .stat-card { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:18px; text-align:center; }
+  .stat-value { font-size:1.7em; font-weight:800; }
+  .stat-label { color:#8b949e; font-size:0.85em; margin-top:4px; }
+  .stat-sub { color:#6e7681; font-size:0.78em; margin-top:2px; }
+  .chart-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:18px; }
+  .chart-card { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:14px; }
   .chart-card img { width:100%; border-radius:8px; }
-  .chart-card .caption { font-size:12px; color:#8892b0; margin-top:8px; text-align:center; }
-
-  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:30px; }
-  .stat { background:linear-gradient(145deg,#1a1a2e,#16213e); border:1px solid #2a2a4a; border-radius:10px; padding:20px; text-align:center; }
-  .stat .num { font-size:28px; font-weight:bold; }
-  .stat .label { font-size:12px; color:#8892b0; margin-top:4px; }
-  .stat.green .num { color:#6bcb77; }
-  .stat.blue .num { color:#00d4ff; }
-  .stat.red .num { color:#ff6b6b; }
-  .stat.orange .num { color:#FFB74D; }
-
-  .findings { background:linear-gradient(145deg,#1a2e1a,#16223e); border:1px solid #43A04744; border-left:4px solid #43A047; border-radius:12px; padding:24px 28px; margin-top:30px; }
-  .findings h3 { color:#6bcb77; margin-bottom:14px; font-size:17px; }
-  .findings ul { padding-left:22px; }
-  .findings li { margin:10px 0; font-size:14px; line-height:1.7; color:#ccd6f6; }
-  .findings strong { color:#00d4ff; }
-
-  .formula { background:#16213e; border:1px solid #2a2a4a; border-radius:8px; padding:14px 18px; margin-bottom:20px; font-family:'Consolas',monospace; font-size:12px; line-height:1.9; color:#8892b0; }
-  .formula strong { color:#00d4ff; }
-
-  @media (max-width:768px) { .chart-row { grid-template-columns:1fr; } .stat-grid { grid-template-columns:1fr 1fr; } .header { flex-direction:column; gap:14px; } }
+  .chart-full { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:14px; margin:14px 0; }
+  .chart-full img { width:100%; border-radius:8px; }
+  .caption { text-align:center; color:#8b949e; font-size:0.88em; margin-top:10px; }
+  .car-tag { display:inline-block; padding:2px 12px; border-radius:6px; font-size:0.8em; font-weight:700; margin-right:8px; }
+  .t-mg { background:rgba(77,150,255,0.2); color:#4d96ff; }
+  .t-rd { background:rgba(255,107,107,0.2); color:#ff6b6b; }
+  table { width:100%; border-collapse:collapse; background:#161b22; border-radius:12px; overflow:hidden; margin:16px 0; font-size:0.92em; }
+  th { background:#21262d; padding:12px 8px; color:#58a6ff; }
+  td { padding:10px 8px; text-align:center; border-bottom:1px solid #21262d; }
+  tr:hover { background:#1c2128; }
+  .blue { color:#4d96ff; font-weight:700; } .red { color:#ff6b6b; font-weight:700; }
+  .green { color:#3fb950; font-weight:700; } .orange { color:#d29922; font-weight:700; }
+  .findings { background:linear-gradient(135deg,#161b22,#1c2128); border:1px solid #21262d; border-radius:12px; padding:24px; }
+  .findings li { margin:12px 0; padding-left:8px; }
+  footer { text-align:center; color:#6e7681; padding:40px 20px; font-size:0.85em; border-top:1px solid #21262d; margin-top:40px; }
+  .system { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:20px; text-align:center; margin:20px 0; }
+  .system .flow { font-size:1.05em; margin:10px 0; }
+  .arrow { color:#58a6ff; font-weight:800; }
 </style>
 </head>
 <body>
-<div class="header">
-  <div>
-    <h1>การวิเคราะห์ — เครื่องปั่นไฟฉุกเฉินสำหรับรถ EV</h1>
-    <div class="subtitle">STUDY OF BATTERY-POWERED EMERGENCY GENERATORS FOR ELECTRIC VEHICLES</div>
-  </div>
-  <a href="index.html" class="nav-btn">← กลับหน้าแดชบอร์ด</a>
-</div>
+
+<header>
+  <h1>⚡ เครื่องปั่นไฟฉุกเฉินจากแบตเตอรี่ 72V สำหรับรถยนต์ไฟฟ้า</h1>
+  <p>ผลการทดลอง วิเคราะห์ และเปรียบเทียบ — ทดสอบจริงกับรถ 2 คัน</p>
+  <span class="badge b-mg">🚗 MG ZS EV (แบต 50.3 kWh)</span>
+  <span class="badge b-rd">🛻 RD6 (แบต 63 kWh)</span>
+</header>
 
 <div class="container">
 
-  <!-- Intro -->
-  <div class="intro">
-    <h2>โครงงานนี้คืออะไร?</h2>
-    <p>
-      การศึกษาและทดสอบ<strong>เครื่องปั่นไฟฉุกเฉินแบบพกพา</strong>ที่ใช้แบตเตอรี่สำหรับชาร์จรถยนต์ไฟฟ้า (EV)
-      เมื่อแบตเตอรี่รถหมดกลางทาง สามารถใช้เครื่องปั่นไฟนี้ชาร์จฉุกเฉินเพื่อขับขี่ไปยังสถานีชาร์จที่ใกล้ที่สุดได้
-    </p>
-    <p style="margin-top:10px;">
-      ทดสอบกับรถ <strong>MG ZS EV (50.3 kWh)</strong> และ <strong>RD6 (63 kWh)</strong>
-      ที่กระแสชาร์จ <strong>8A / 10A / 13A / 16A</strong> เป็นเวลา 1 ชั่วโมง
-    </p>
+<div class="system">
+  <div style="color:#8b949e; font-size:0.9em;">ระบบทดลอง</div>
+  <div class="flow">
+    แบต 72V 100Ah (7.2 kWh) <span class="arrow">→</span> มอเตอร์ FW15-7000 (η 91%) <span class="arrow">→</span> AC Generator (η 85%) <span class="arrow">→</span> หัวชาร์จรถ (η 68–78%)
   </div>
+  <div style="color:#d29922; font-weight:700;">ประสิทธิภาพระบบรวม 53–60% | ทดลองที่ 8A / 10A / 13A / 16A นาน 1 ชม. ต่อกรณี</div>
+</div>
 
-  <!-- System Architecture -->
-  <div class="system-box">
-    <div class="flow">
-      🔋 แบต 72V 100Ah (7.2 kWh)
-      <span class="arrow">→</span> ⚙️ มอเตอร์ FW15-7000
-      <span class="arrow">→</span> ⚡ AC Generator
-      <span class="arrow">→</span> 🚗 รถ EV
-    </div>
-    <div class="eta">
-      η มอเตอร์ &gt;91% &nbsp;|&nbsp; η เครื่องปั่นไฟ ≈85% &nbsp;|&nbsp; η charger 68-78%<br>
-      <strong style="color:#00d4ff;">η ระบบรวม = 53-60%</strong> (สูญเสียพลังงาน 40-47%)
-    </div>
+<!-- ================= สถิติหลัก ================= -->
+<div class="section">
+  <h2>📊 ตัวเลขสำคัญ (เครื่องปั่นไฟ, 16A)</h2>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value" style="color:#4d96ff">3.61 kW</div>
+<div class="stat-label">กำลังไฟ MG</div><div class="stat-sub">RD6 3.55 kW</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#3fb950">2.46 kWh</div>
+<div class="stat-label">พลังงานรถได้ MG</div><div class="stat-sub">RD6 2.42 kWh</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#58a6ff">+4.9%</div>
+<div class="stat-label">SOC รถเพิ่ม MG</div><div class="stat-sub">RD6 +3.8%</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#d29922">35%</div>
+<div class="stat-label">แบตเครื่องปั่นเหลือ</div><div class="stat-sub">RD6 36%</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#ff6b6b">~2.7 เท่า</div>
+<div class="stat-label">น้ำมันแพงกว่าแบต</div><div class="stat-sub">ประหยัด 18.8–36.8 บ./ชม.</div></div>
   </div>
+</div>
 
-  <!-- Formula -->
-  <div class="formula">
-    <strong>สูตรคำนวณ:</strong><br>
-    E_แบต = E_AC / (0.91 × 0.85) &nbsp; ← พลังงานที่แบต 72V จ่ายจริง<br>
-    E_รถ = E_AC × η_charger &nbsp; ← พลังงานที่รถได้รับ<br>
-    Loss = E_แบต − E_รถ &nbsp; ← สูญเสียทั้งระบบ
+<!-- ================= 1. กำลังไฟ ================= -->
+<div class="section">
+  <h2>1. กำลังไฟฟ้า — ไฟบ้าน vs เครื่องปั่นไฟ (ทั้งสองคัน)</h2>
+  <p class="desc">แยกซ้าย-ขวาเป็นรถแต่ละคัน เขียว=ชาร์จจากไฟบ้าน แดง=ชาร์จจากเครื่องปั่นไฟ</p>
+  <div class="chart-full">
+    <img src="img/web_13_power.png" alt="Power both cars">
+    <div class="caption">กำลังไฟฟ้าเฉลี่ย 1 ชม. — เครื่องปั่นไฟจ่ายได้ใกล้เคียงไฟบ้านทุกกระแส</div>
   </div>
+</div>
 
-  <!-- Key Stats -->
-  <div class="stat-grid">
-    <div class="stat green">
-      <div class="num">2.5</div>
-      <div class="label">kWh รถได้ (16A, 1 ชม.)</div>
-    </div>
-    <div class="stat red">
-      <div class="num">2.2</div>
-      <div class="label">kWh Loss (16A)</div>
-    </div>
-    <div class="stat orange">
-      <div class="num">65%</div>
-      <div class="label">แบตเครื่องปั่นไฟลด (16A)</div>
-    </div>
-    <div class="stat blue">
-      <div class="num">4.9%</div>
-      <div class="label">SOC รถเพิ่ม (16A, 1 ชม.)</div>
-    </div>
+<!-- ================= 2. SOC ================= -->
+<div class="section">
+  <h2>2. SOC รถที่เพิ่มขึ้น (ทั้งสองคัน)</h2>
+  <p class="desc">1 ชม. ทั้งสองแหล่งให้ SOC เท่ากัน | MG เพิ่มมากกว่า RD6 เพราะแบตเล็กกว่า (50.3 vs 63 kWh)</p>
+  <div class="chart-full">
+    <img src="img/web_14_soc.png" alt="SOC both cars">
+    <div class="caption">SOC เพิ่มใน 1 ชม.: MG 2.9–4.9% | RD6 2.2–3.9%</div>
   </div>
+</div>
 
-  <!-- Section 1: Loss -->
-  <div class="section">
-    <h2>1. พลังงานหายไปไหน? (Loss)</h2>
-    <p class="desc">จากแบต 72V ไปถึงรถ EV พลังงานสูญเสียไป 40-47% แบ่งเป็น 3 ส่วน</p>
-
-    <div class="chart-full">
-      <img src="img/web_05_flow.png" alt="Energy Flow">
-      <div class="caption">MG ZS EV 16A: แบต 4.67 kWh → รถได้ 2.46 kWh (หายไป 2.21 kWh = 47%)</div>
-    </div>
-
-    <div class="chart-row">
-      <div class="chart-card">
-        <img src="img/web_06_loss.png" alt="Loss breakdown">
-        <div class="caption">Loss แบ่งตามขั้นตอน: มอเตอร์ + เครื่องปั่นไฟ + charger</div>
-      </div>
-      <div class="chart-card">
-        <img src="img/web_07_pie.png" alt="Pie 8A vs 16A">
-        <div class="caption">เปรียบเทียบ Loss: 8A vs 16A</div>
-      </div>
-    </div>
+<!-- ================= 3. แบตเครื่องปั่นไฟ ================= -->
+<div class="section">
+  <h2>3. แบต 7.2 kWh เหลือเท่าไหร่หลังชาร์จ 1 ชม.</h2>
+  <p class="desc">โซนแดง = ต่ำกว่า 20% ต้องชาร์จแบตคืน | ที่ 16A เหลือเพียง ~35% ทั้งสองคัน</p>
+  <div class="chart-full">
+    <img src="img/web_15_batt.png" alt="Battery remaining">
+    <div class="caption">SOC แบตคงเหลือ: MG 16A เหลือ 35% | RD6 เหลือ 36%</div>
   </div>
+</div>
 
-  <!-- Section 2: SOC 10% -->
-  <div class="section">
-    <h2>2. ชาร์จ 1 ชม. → SOC เพิ่มกี่ %? (ขอบเขต 1.4.4)</h2>
-    <p class="desc">เป้าหมายคือเพิ่ม SOC 10% แต่ใน 1 ชม.ยังไม่ถึง ต้องชาร์จนานขึ้น</p>
-
-    <div class="chart-row">
-      <div class="chart-card">
-        <img src="img/web_01_SOC_1hr.png" alt="SOC 1hr">
-        <div class="caption">SOC รถที่เพิ่มใน 1 ชม. (เทียบกับเป้า 10%)</div>
-      </div>
-      <div class="chart-card">
-        <img src="img/web_02_time_SOC10.png" alt="Time to SOC 10%">
-        <div class="caption">ต้องชาร์จกี่นาที ถึงจะ SOC +10%?</div>
-      </div>
-    </div>
+<!-- ================= 4. อุณหภูมิ ================= -->
+<div class="section">
+  <h2>4. อุณหภูมิระหว่างชาร์จ (ทั้งสองคัน)</h2>
+  <p class="desc">Tuya meter ความละเอียด 1°C | RD6 ร้อนกว่า MG ~1°C ทุกกระแส</p>
+  <div class="chart-full">
+    <img src="img/web_16_temp.png" alt="Temp both cars">
+    <div class="caption">อุณหภูมิขึ้นจาก 25°C → 27–33°C ตามกระแส</div>
   </div>
+</div>
 
-  <!-- Section 3: Battery -->
-  <div class="section">
-    <h2>3. แบตเครื่องปั่นไฟ 1 ก้อน (7.2 kWh)</h2>
-    <p class="desc">วิเคราะห์ว่าแบตหมดเร็วแค่ไหน (ขอบเขต 1.5.1-1.5.2)</p>
-
-    <div class="chart-row">
-      <div class="chart-card">
-        <img src="img/web_03_batt_drain.png" alt="Battery drain">
-        <div class="caption">ชาร์จ 1 ชม. → แบตลดกี่ %?</div>
-      </div>
-      <div class="chart-card">
-        <img src="img/web_04_batt_empty.png" alt="Battery empty time">
-        <div class="caption">ประมาณการแบตหมด (ชม.)</div>
-      </div>
-    </div>
+<!-- ================= 5. การสิ้นเปลือง ================= -->
+<div class="section">
+  <h2>5. Loss พลังงานทั้งระบบ</h2>
+  <p class="desc">แบต → มอเตอร์ (−9%) → เครื่องปั่นไฟ (−15%) → charger (−22–32%)</p>
+  <div class="chart-row">
+    <div class="chart-card"><img src="img/web_05_flow.png" alt="Flow"><div class="caption">การไหลพลังงาน MG 16A</div></div>
+    <div class="chart-card"><img src="img/web_06_loss.png" alt="Loss"><div class="caption">Loss แบ่งตามขั้นตอน</div></div>
+    <div class="chart-card"><img src="img/web_07_pie.png" alt="Pie"><div class="caption">8A (η=60%) vs 16A (η=53%)</div></div>
+    <div class="chart-card"><img src="img/web_03_batt_drain.png" alt="Batt"><div class="caption">SOC แบตลดตามเวลา</div></div>
   </div>
+</div>
 
-  <!-- Section 4: Comparison -->
-  <div class="section">
-    <h2>4. ไฟบ้าน vs เครื่องปั่นไฟ</h2>
-    <p class="desc">เปรียบเทียบแรงดันและต้นทุน ระหว่างชาร์จจากไฟบ้านและเครื่องปั่นไฟ</p>
-
-    <div class="chart-full">
-      <img src="img/web_08_voltage.png" alt="Voltage comparison">
-      <div class="caption">แรงดัน: ไฟบ้านเสถียร 230V — เครื่องปั่นไฟแกว่ง 222-231V</div>
-    </div>
-
-    <div class="chart-full">
-      <img src="img/web_09_cost.png" alt="Cost comparison">
-      <div class="caption">ต้นทุน: เครื่องปั่นไฟแพงกว่าเพราะ Loss มอเตอร์+เครื่องปั่นไฟ</div>
-    </div>
+<!-- ================= 6. ต้นทุน ================= -->
+<div class="section">
+  <h2>6. ต้นทุนค่าไฟ (ทั้งสองคัน)</h2>
+  <p class="desc">อัตราไฟฟ้า 4.5 บาท/kWh | เครื่องปั่นไฟแพงกว่าเพราะเสีย Loss ที่มอเตอร์+เครื่องปั่นไฟ</p>
+  <div class="chart-row">
+    <div class="chart-card"><img src="img/web_09_cost.png" alt="Cost"><div class="caption">ไฟบ้าน vs เครื่องปั่นไฟ</div></div>
+    <div class="chart-card"><img src="img/web_10_cost_all.png" alt="Cost all"><div class="caption">ทุกกรณี เรียงแพง→ถูก</div></div>
   </div>
+</div>
 
-  <!-- Section 5: All costs -->
-  <div class="section">
-    <h2>5. ต้นทุนทุกกรณี</h2>
-    <p class="desc">เรียงจากแพงสุด → ถูกสุด เขียว=ไฟบ้าน แดง=เครื่องปั่นไฟ</p>
-    <div class="chart-full">
-      <img src="img/web_10_cost_all.png" alt="All costs">
-      <div class="caption">ต้นทุนค่าไฟทุกกรณี (4.5 บาท/kWh, 1 ชม.)</div>
+<!-- ================= 7. น้ำมัน ================= -->
+<div class="section">
+  <h2>7. ⛽ เทียบกับเครื่องปั่นไฟน้ำมัน (ครบทั้งสองคัน)</h2>
+  <p class="desc">
+    สมมติฐาน: เครื่องปั่นไฟเบนซิน 5 kW | กินน้ำมัน 0.4 ลิตร/kWh | น้ำมัน 40 บาท/ลิตร<br>
+    <strong style="color:#ff6b6b;">น้ำมันแพงกว่าแบต ~2.7 เท่า ทั้งสองคัน!</strong>
+  </p>
+  <div class="chart-row">
+    <div class="chart-card">
+      <span class="car-tag t-mg">MG ZS EV</span>
+      <img src="img/web_17_oil_mg.png" alt="Oil MG">
+      <div class="caption">MG: น้ำมัน 29.5–57.8 บาท/ชม.</div>
     </div>
+    <div class="chart-card">
+      <span class="car-tag t-rd">RD6</span>
+      <img src="img/web_18_oil_rd6.png" alt="Oil RD6">
+      <div class="caption">RD6: น้ำมัน 29.2–56.8 บาท/ชม.</div>
+    </div>
+    <div class="chart-card"><img src="img/web_19_oil_both.png" alt="Oil both"><div class="caption">6 แหล่งเทียบกัน — ต้นทุนสองคันใกล้เคียง &lt;3%</div></div>
+    <div class="chart-card"><img src="img/web_20_fuel_liters.png" alt="Fuel liters"><div class="caption">น้ำมันที่กิน: 0.73–1.45 ลิตร/ชม.</div></div>
   </div>
-
-  <!-- Section 6: Gasoline comparison -->
-  <div class="section">
-    <h2>6. เทียบกับเครื่องปั่นไฟน้ำมัน ⛽</h2>
-    <p class="desc">
-      ถ้าใช้เครื่องปั่นไฟเบนซิน 5 kW แทน (อัตรากินน้ำมัน 0.4 ลิตร/kWh, น้ำมัน 40 บาท/ลิตร)<br>
-      <strong style="color:#ff6b6b;">เครื่องปั่นไฟน้ำมันแพงกว่าเครื่องปั่นไฟแบต ~2.7 เท่า!</strong>
-    </p>
-    <div class="chart-full">
-      <img src="img/web_11_oil.png" alt="Oil vs Battery">
-      <div class="caption">ต้นทุน 3 แหล่งพลังงาน: ไฟบ้าน vs แบต vs น้ำมัน (บาท/ชม.)</div>
-    </div>
-    <div class="chart-full">
-      <img src="img/web_12_oil_table.png" alt="Oil table">
-      <div class="caption">ตารางคำนวณ: ลิตร = E_AC × 0.4 | บาท = ลิตร × 40</div>
-    </div>
+  <div class="chart-full">
+    <img src="img/web_12_oil_table.png" alt="Oil table">
+    <div class="caption">ตารางคำนวณ: ลิตร = E_AC × 0.4 | บาท = ลิตร × 40</div>
   </div>
+</div>
 
-  <!-- Section 7: MG vs RD6 -->
-  <div class="section">
-    <h2>7. เปรียบเทียบรถทั้งสองคัน: MG ZS EV vs RD6 🚗 vs 🚗</h2>
-    <p class="desc">
-      MG ZS EV (แบต 50.3 kWh) vs RD6 (แบต 63 kWh) ชาร์จจากเครื่องปั่นไฟเหมือนกัน<br>
-      <strong style="color:#00d4ff;">ข้อสังเกต:</strong> MG รับพลังงานได้มากกว่าเล็กน้อย + SOC เพิ่มเร็วกว่าเพราะแบตเล็กกว่า
-    </p>
+<!-- ================= ตารางเปรียบเทียบ ================= -->
+<div class="section">
+  <h2>📋 ตารางเปรียบเทียบ MG ZS EV vs RD6 (เครื่องปั่นไฟ)</h2>
+  <table>
+    <tr><th rowspan="2">กระแส</th><th colspan="3" style="color:#4d96ff">MG ZS EV (50.3 kWh)</th><th colspan="3" style="color:#ff6b6b">RD6 (63 kWh)</th></tr>
+    <tr><th>กำลังไฟ (kW)</th><th>SOC รถ+</th><th>แบตเหลือ</th><th>กำลังไฟ (kW)</th><th>SOC รถ+</th><th>แบตเหลือ</th></tr>
+    <tr><td><strong>8A</strong></td>
+    <td class="blue">1.85</td><td class="blue">+2.9%</td><td class="blue">67%</td>
+    <td class="red">1.82</td><td class="red">+2.3%</td><td class="red">67%</td></tr>
+    <tr><td><strong>10A</strong></td>
+    <td class="blue">2.30</td><td class="blue">+3.4%</td><td class="blue">59%</td>
+    <td class="red">2.27</td><td class="red">+2.7%</td><td class="red">59%</td></tr>
+    <tr><td><strong>13A</strong></td>
+    <td class="blue">2.96</td><td class="blue">+4.2%</td><td class="blue">47%</td>
+    <td class="red">2.92</td><td class="red">+3.3%</td><td class="red">48%</td></tr>
+    <tr><td><strong>16A</strong></td>
+    <td class="blue">3.61</td><td class="blue">+4.9%</td><td class="blue">35%</td>
+    <td class="red">3.55</td><td class="red">+3.8%</td><td class="red">36%</td></tr>
+  </table>
+</div>
 
-    <div class="chart-row">
-      <div class="chart-card">
-        <img src="img/web_13_power.png" alt="Power MG vs RD6">
-        <div class="caption">กำลังไฟฟ้าเฉลี่ย: MG สูงกว่า RD6 เล็กน้อยทุกกระแส</div>
-      </div>
-      <div class="chart-card">
-        <img src="img/web_14_soc.png" alt="SOC MG vs RD6">
-        <div class="caption">SOC รถเพิ่ม: MG เพิ่มมากกว่า เพราะแบต 50.3 kWh เล็กกว่า 63 kWh</div>
-      </div>
-      <div class="chart-card">
-        <img src="img/web_15_batt.png" alt="Battery drain MG vs RD6">
-        <div class="caption">แบตเครื่องปั่นไฟลด: ใกล้เคียงกัน (MG ใช้มากกว่าเล็กน้อย)</div>
-      </div>
-      <div class="chart-card">
-        <img src="img/web_16_temp.png" alt="Temp MG vs RD6">
-        <div class="caption">อุณหภูมิ: RD6 ร้อนกว่า MG ~1°C ทุกกระแส</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Findings -->
+<!-- ================= ข้อค้นพบ ================= -->
+<div class="section">
+  <h2>💡 ข้อค้นพบสำคัญ</h2>
   <div class="findings">
-    <h3>สรุปข้อค้นพบ</h3>
-    <ul>
-      <li><strong>Loss ทั้งระบบ 47%:</strong> จากแบต 4.67 kWh รถได้รับเพียง 2.46 kWh (16A) — หายไปที่มอเตอร์(9%), เครื่องปั่นไฟ(15%), charger(32%)</li>
-      <li><strong>η ระบบรวม 53-60%:</strong> กระแสต่ำ → ประสิทธิภาพสูงกว่า (8A: 60% > 16A: 53%)</li>
-      <li><strong>แบต 7.2 kWh หมดเร็ว:</strong> ชาร์จ 16A แค่ 1 ชม. → แบตลด 65% (เหลือ 35%)</li>
-      <li><strong>SOC รถเพิ่มช้า:</strong> 1 ชม. ที่ 16A เพิ่ม SOC แค่ 4.9% — ต้องใช้ 84 นาที ถึงจะ +10%</li>
-      <li><strong>เครื่องปั่นไฟแพงกว่าไฟบ้าน:</strong> 16A แพงกว่า 6.6 บาท/ชม. เพราะสูญเสียพลังงานที่มอเตอร์+เครื่องปั่นไฟ</li>
-      <li><strong>ถูกกว่าเครื่องปั่นไฟน้ำมัน ~2.7 เท่า:</strong> น้ำมันเบนซินเสีย 29.5-57.8 บาท/ชม. แต่แบตเสียเพียง 10.7-21.0 บาท/ชม. (ประหยัด 18.8-36.8 บาท/ชม.)</li>
-      <li><strong>MG vs RD6:</strong> MG รับกำลังไฟมากกว่าเล็กน้อย (3.61 vs 3.55 kW ที่ 16A) และ SOC เพิ่มเร็วกว่า (4.9% vs 3.8% ที่ 16A) เพราะแบตเล็กกว่า (50.3 vs 63 kWh)</li>
-      <li><strong>เหมาะใช้ฉุกเฉิน:</strong> แบต 7.2 kWh เล็กเทียบรถ 50-63 kWh — ชาร์จฉุกเฉินพอขับไปสถานีชาร์จใกล้สุด</li>
+    <ul style="padding-left:22px">
+      <li><strong>สองคันรับไฟใกล้กัน:</strong> กำลังไฟ 16A — MG 3.61 kW vs RD6 3.55 kW (ต่างกัน &lt;2%) เครื่องปั่นไฟเดียวใช้ได้ทั้งคู่</li>
+      <li><strong>แต่ SOC เพิ่มต่างกัน:</strong> 1 ชม. 16A — MG +4.9% vs RD6 +3.8% เพราะแบต RD6 ใหญ่กว่า (63 vs 50.3 kWh)</li>
+      <li><strong>Loss ทั้งระบบ 40–47%:</strong> η รวม 53–60% — กระแสยิ่งสูง Loss ยิ่งมาก (charger 8A η=78% → 16A η=68%)</li>
+      <li><strong>แบต 7.2 kWh หมดเร็ว:</strong> 16A ใช้ 1 ชม. เหลือ ~35% — ต้องชาร์จแบตคืนก่อนโซนอันตราย 20%</li>
+      <li><strong>ต้นทุนเครื่องปั่นไฟแบต:</strong> แพงกว่าไฟบ้าน 2.4–4.7 บาท/ชม. แต่ <span class="red">ถูกกว่าน้ำมัน ~2.7 เท่า</span> (ประหยัด 18.8–36.8 บาท/ชม.)</li>
+      <li><strong>เหมาะใช้ฉุกเฉิน:</strong> ชาร์จ 1 ชม. ได้ SOC ~3–5% พอขับไปสถานีชาร์จใกล้สุด ไม่ได้ใช้แทนสถานีชาร์จโหมดเร็ว</li>
     </ul>
   </div>
+</div>
+
+<footer>
+  โครงงาน การศึกษาเครื่องปั่นไฟฉุกเฉินที่ใช้แบตเตอรี่สำหรับรถยนต์ไฟฟ้า<br>
+  ทดสอบจริง MG ZS EV + RD6 • กระแส 8/10/13/16A • นาน 1 ชม. ต่อกรณี
+</footer>
 
 </div>
 </body>

@@ -24,9 +24,11 @@
   .stat-sub { color:#6e7681; font-size:0.78em; margin-top:2px; }
   .chart-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:18px; }
   .chart-card { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:14px; }
-  .chart-card img { width:100%; border-radius:8px; }
+  .chart-card img { width:100%; border-radius:8px; cursor:zoom-in; }
+  .chart-card img:hover { opacity:0.85; }
   .chart-full { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:14px; margin:14px 0; }
-  .chart-full img { width:100%; border-radius:8px; }
+  .chart-full img { width:100%; border-radius:8px; cursor:zoom-in; }
+  .chart-full img:hover { opacity:0.85; }
   .caption { text-align:center; color:#8b949e; font-size:0.88em; margin-top:10px; }
   .car-tag { display:inline-block; padding:2px 12px; border-radius:6px; font-size:0.8em; font-weight:700; margin-right:8px; }
   .t-mg { background:rgba(77,150,255,0.2); color:#4d96ff; }
@@ -43,6 +45,19 @@
   .system { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:20px; text-align:center; margin:20px 0; }
   .system .flow { font-size:1.05em; margin:10px 0; }
   .arrow { color:#58a6ff; font-weight:800; }
+  /* CSS bar chart */
+  .csschart { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:20px 24px; margin:14px 0; }
+  .cchart-title { font-size:1.25em; font-weight:800; margin-bottom:14px; }
+  .brow { display:grid; grid-template-columns:52px 1fr; gap:4px 14px; align-items:center; margin:10px 0; }
+  .blabel { font-weight:800; font-size:1.05em; color:#e6edf3; }
+  .btrack { display:flex; align-items:center; gap:8px; }
+  .bname { width:96px; font-size:0.82em; color:#8b949e; text-align:right; flex-shrink:0; }
+  .bar { height:30px; border-radius:6px; display:flex; align-items:center; padding-left:10px; min-width:58px; }
+  .bar span { font-weight:800; font-size:0.95em; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.4); }
+  /* lightbox */
+  .lb { position:fixed; inset:0; background:rgba(0,0,0,0.92); display:none; z-index:99; cursor:zoom-out; }
+  .lb img { max-width:96vw; max-height:94vh; margin:3vh auto; display:block; border-radius:8px; }
+  .lb-open { display:block; }
 </style>
 </head>
 <body>
@@ -81,14 +96,105 @@
   </div>
 </div>
 
-<!-- ================= 1. กำลังไฟ ================= -->
+<!-- ================= 1. กำลังไฟ (HTML/CSS ล้วน คมชัดทุกจอ) ================= -->
 <div class="section">
   <h2>1. กำลังไฟฟ้า — ไฟบ้าน vs เครื่องปั่นไฟ (ทั้งสองคัน)</h2>
-  <p class="desc">แยกซ้าย-ขวาเป็นรถแต่ละคัน เขียว=ชาร์จจากไฟบ้าน แดง=ชาร์จจากเครื่องปั่นไฟ</p>
-  <div class="chart-full">
-    <img src="img/web_13_power.png" alt="Power both cars">
-    <div class="caption">กำลังไฟฟ้าเฉลี่ย 1 ชม. — เครื่องปั่นไฟจ่ายได้ใกล้เคียงไฟบ้านทุกกระแส</div>
+  <p class="desc">เขียว = ไฟบ้าน | แดง = เครื่องปั่นไฟ (หน่วย kW)</p>
+  <div class="csschart">
+    <div class="cchart-title" style="color:#4d96ff">🚗 MG ZS EV</div>
+    <div class="brow">
+      <div class="blabel">8A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:40%; background:#3fb950"><span>1.84</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:40%; background:#ff6b6b"><span>1.85</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">10A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:50%; background:#3fb950"><span>2.30</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:50%; background:#ff6b6b"><span>2.30</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">13A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:65%; background:#3fb950"><span>2.99</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:64%; background:#ff6b6b"><span>2.96</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">16A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:80%; background:#3fb950"><span>3.68</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:79%; background:#ff6b6b"><span>3.61</span></div>
+      </div>
+    </div>
   </div>
+  <div class="csschart">
+    <div class="cchart-title" style="color:#ff6b6b">🛻 RD6</div>
+    <div class="brow">
+      <div class="blabel">8A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:40%; background:#3fb950"><span>1.84</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:40%; background:#ff6b6b"><span>1.82</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">10A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:50%; background:#3fb950"><span>2.30</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:49%; background:#ff6b6b"><span>2.27</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">13A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:65%; background:#3fb950"><span>2.99</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:63%; background:#ff6b6b"><span>2.92</span></div>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="blabel">16A</div>
+      <div class="btrack">
+        <div class="bname" style="color:#3fb950">ไฟบ้าน</div>
+        <div class="bar" style="width:80%; background:#3fb950"><span>3.68</span></div>
+      </div>
+      <div class="btrack">
+        <div class="bname" style="color:#ff6b6b">เครื่องปั่นไฟ</div>
+        <div class="bar" style="width:77%; background:#ff6b6b"><span>3.55</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="caption">เครื่องปั่นไฟจ่ายกำลังได้ใกล้เคียงไฟบ้านทุกกระแส (ต่างกัน &lt;2%)</p>
 </div>
 
 <!-- ================= 2. SOC ================= -->
@@ -212,5 +318,17 @@
 </footer>
 
 </div>
+
+<div class="lb" id="lightbox" onclick="this.classList.remove('lb-open')"><img id="lb-img" src=""></div>
+<script>
+document.querySelectorAll('.chart-card img, .chart-full img').forEach(function(im){
+  im.addEventListener('click', function(){
+    var lb=document.getElementById('lightbox');
+    document.getElementById('lb-img').src=im.src;
+    lb.classList.add('lb-open');
+  });
+});
+</script>
+
 </body>
 </html>

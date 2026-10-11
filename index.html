@@ -628,10 +628,15 @@ window.addEventListener('DOMContentLoaded', function() {
 <!-- ===== เปรียบเทียบผลทดลอง: เครื่องปั่นไฟจากแบตเตอรี่ vs ไฟบ้าน ===== -->
 <section class="section power-compare" id="cost-comparison">
   <h2>⚡ เปรียบเทียบผลทดลอง: เครื่องปั่นไฟจากแบตเตอรี่ vs ไฟบ้าน</h2>
-  <p style="color:#8892b0;margin:0 0 16px">เปรียบเทียบข้อมูลทดลองจริงของรถและกระแสเดียวกัน เลือกรุ่นรถกับกระแสจากตัวเลือกด้านบนเพื่อดูผล</p>
+  <p style="color:#8892b0;margin:0 0 16px">เทียบค่าไฟบ้านกับค่าไฟขั้นต่ำเพื่อเติมพลังงานแบตที่ใช้ไปในการทดลอง เลือกรถและกระแสจากตัวเลือกด้านบน</p>
+  <div class="params-panel">
+    <div class="param-item"><label>อัตราค่าไฟฐาน (บาท/kWh)</label><input id="compareBaseRate" type="number" value="4.2218" step="0.0001" min="0"></div>
+    <div class="param-item"><label>ค่า Ft (บาท/kWh)</label><input id="compareFtRate" type="number" value="0" step="0.01"></div>
+    <div class="param-item"><label>VAT (%)</label><input id="compareVatRate" type="number" value="7" step="0.1" min="0"></div>
+  </div>
   <div id="experimentCompare" class="stats-grid" aria-live="polite"><div class="loading">กำลังอ่านข้อมูลทดลอง…</div></div>
   <div class="chart-section" style="opacity:1;transform:none">
-    <h2>พลังงานที่วัดได้จากแหล่งจ่าย</h2>
+    <h2>ประมาณค่าไฟต่อการทดลอง 1 ชั่วโมง</h2>
     <div class="chart-wrapper"><canvas id="chartExperimentalCompare"></canvas></div>
   </div>
   <p class="data-note">ค่าทั้งหมดดึงจากไฟล์ CSV ทดลองของรถและกระแสที่เลือก โดยใช้ช่วงเวลาและคอลัมน์เดียวกัน: พลังงานสะสมคำนวณ, กำลังเฉลี่ย/สูงสุด, แรงดันเฉลี่ย และอุณหภูมิสูงสุด</p>
@@ -682,19 +687,28 @@ window.addEventListener('DOMContentLoaded', function() {
     host.innerHTML='<div class="loading">กำลังอ่านข้อมูลทดลอง…</div>';
     Promise.all([readExperiment('home'),readExperiment('generator')]).then(function(results){
       var home=results[0], gen=results[1];
+      var car=document.getElementById('carSelector').value;
+      var amp=parseInt(home.label,10);
+      var remainingByCar={mg:{8:67,10:59,13:47,16:35},rd6:{8:67,10:59,13:48,16:36}};
+      var batteryRemaining=remainingByCar[car][amp];
+      var batteryUsed=7.2*(100-batteryRemaining)/100;
+      var unitRate=((parseFloat(document.getElementById('compareBaseRate').value)||0)+(parseFloat(document.getElementById('compareFtRate').value)||0))*(1+(parseFloat(document.getElementById('compareVatRate').value)||0)/100);
+      var homeCost=home.energy*unitRate;
+      var batteryCost=batteryUsed*unitRate;
+      var cheaper=homeCost<=batteryCost?'ไฟบ้าน':'เครื่องปั่นไฟจากแบตเตอรี่';
       host.innerHTML=
-        '<div class="stat-card cost-card-home"><div class="label">ไฟบ้าน · '+home.label+'</div><div class="value">'+fmt(home.energy,3)+'</div><div class="unit">kWh พลังงานสะสมที่บันทึกได้</div><div class="data-note">กำลังเฉลี่ย '+fmt(home.avgPower,3)+' kW · สูงสุด '+fmt(home.peakPower,3)+' kW<br>แรงดันเฉลี่ย '+fmt(home.avgVoltage,1)+' V · อุณหภูมิสูงสุด '+fmt(home.peakTemp,1)+' °C<br>ระยะทดลอง '+fmt(home.duration,1)+' นาที · '+home.points+' จุดข้อมูล</div></div>'+
-        '<div class="stat-card cost-card-gen"><div class="label">เครื่องปั่นไฟจากแบตเตอรี่ · '+gen.label+'</div><div class="value">'+fmt(gen.energy,3)+'</div><div class="unit">kWh พลังงานสะสมที่บันทึกได้</div><div class="data-note">กำลังเฉลี่ย '+fmt(gen.avgPower,3)+' kW · สูงสุด '+fmt(gen.peakPower,3)+' kW<br>แรงดันเฉลี่ย '+fmt(gen.avgVoltage,1)+' V · อุณหภูมิสูงสุด '+fmt(gen.peakTemp,1)+' °C<br>ระยะทดลอง '+fmt(gen.duration,1)+' นาที · '+gen.points+' จุดข้อมูล</div></div>'+
-        card('พลังงานต่างกัน',fmt(Math.abs(home.energy-gen.energy),3),'kWh · '+(home.energy>=gen.energy?'ไฟบ้าน':'เครื่องปั่นไฟจากแบตเตอรี่')+' บันทึกได้มากกว่า', '#00d4ff')+
-        card('กำลังเฉลี่ยต่างกัน',fmt(Math.abs(home.avgPower-gen.avgPower),3),'kW · เปรียบเทียบตามการทดลอง', '#ffd93d');
+        '<div class="stat-card cost-card-home"><div class="label">ไฟบ้าน · '+home.label+'</div><div class="value">'+fmt(homeCost,2)+' บาท</div><div class="unit">พลังงานทดลอง '+fmt(home.energy,3)+' kWh · '+fmt(unitRate,4)+' บาท/kWh</div><div class="data-note">กำลังเฉลี่ย '+fmt(home.avgPower,3)+' kW · สูงสุด '+fmt(home.peakPower,3)+' kW<br>แรงดันเฉลี่ย '+fmt(home.avgVoltage,1)+' V · อุณหภูมิสูงสุด '+fmt(home.peakTemp,1)+' °C</div></div>'+
+        '<div class="stat-card cost-card-gen"><div class="label">เครื่องปั่นไฟจากแบตเตอรี่ · '+gen.label+'</div><div class="value">'+fmt(batteryCost,2)+' บาท</div><div class="unit">แบตใช้ไปประมาณ '+fmt(batteryUsed,3)+' kWh · เหลือ '+batteryRemaining+'%</div><div class="data-note">พลังงานทดลองที่จ่ายออก '+fmt(gen.energy,3)+' kWh<br>กำลังเฉลี่ย '+fmt(gen.avgPower,3)+' kW · สูงสุด '+fmt(gen.peakPower,3)+' kW<br>แรงดันเฉลี่ย '+fmt(gen.avgVoltage,1)+' V · อุณหภูมิสูงสุด '+fmt(gen.peakTemp,1)+' °C</div></div>'+
+        card('ส่วนต่างค่าไฟ',fmt(Math.abs(homeCost-batteryCost),2),'บาท · '+cheaper+' ใช้ค่าไฟน้อยกว่า', '#00d4ff')+
+        card('ผลการทดลอง',fmt(Math.abs(home.energy-gen.energy),3),'kWh พลังงาน AC ต่างกัน', '#ffd93d');
       var carName=CAR_NAMES[document.getElementById('carSelector').value]||'';
       document.querySelector('#cost-comparison > p').textContent='ผลทดลองจริงของ '+carName+' ที่กระแส '+home.label+' โดยใช้ข้อมูลจากไฟล์ CSV ของไฟบ้านและเครื่องปั่นไฟจากแบตเตอรี่';
       if(compareChart)compareChart.destroy();
       compareChart=new Chart(document.getElementById('chartExperimentalCompare'),{
         type:'bar',
-        data:{labels:['พลังงานสะสม (kWh)'],datasets:[
-          {label:'ไฟบ้าน',data:[home.energy],backgroundColor:'rgba(107,203,119,.7)',borderColor:'#6bcb77',borderWidth:2},
-          {label:'เครื่องปั่นไฟจากแบตเตอรี่',data:[gen.energy],backgroundColor:'rgba(255,159,67,.7)',borderColor:'#ff9f43',borderWidth:2}
+        data:{labels:['ค่าไฟต่อการทดลอง (บาท)'],datasets:[
+          {label:'ไฟบ้าน',data:[homeCost],backgroundColor:'rgba(107,203,119,.7)',borderColor:'#6bcb77',borderWidth:2},
+          {label:'เครื่องปั่นไฟจากแบตเตอรี่',data:[batteryCost],backgroundColor:'rgba(255,159,67,.7)',borderColor:'#ff9f43',borderWidth:2}
         ]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#ccd6f6'}},tooltip:{backgroundColor:'#1a1a2e',titleColor:'#00d4ff',bodyColor:'#ccd6f6'}},scales:{x:{ticks:{color:'#8892b0'},grid:{color:'#1e1e3a'}},y:{beginAtZero:true,ticks:{color:'#8892b0'},grid:{color:'#1e1e3a'}}}}
       });
@@ -705,6 +719,7 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('sourceSelector').addEventListener('change',render);
   document.getElementById('carSelector').addEventListener('change',render);
   document.getElementById('currentSelector').addEventListener('change',render);
+  ['compareBaseRate','compareFtRate','compareVatRate'].forEach(function(id){document.getElementById(id).addEventListener('input',render);});
   render();
 })();
 </script>

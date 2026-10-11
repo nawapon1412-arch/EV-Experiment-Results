@@ -692,9 +692,9 @@ window.addEventListener('DOMContentLoaded', function() {
       if(compareChart)compareChart.destroy();
       compareChart=new Chart(document.getElementById('chartExperimentalCompare'),{
         type:'bar',
-        data:{labels:['พลังงานสะสม (kWh)','กำลังเฉลี่ย (kW)','กำลังสูงสุด (kW)'],datasets:[
-          {label:'ไฟบ้าน',data:[home.energy,home.avgPower,home.peakPower],backgroundColor:'rgba(107,203,119,.7)',borderColor:'#6bcb77',borderWidth:2},
-          {label:'เครื่องปั่นไฟจากแบตเตอรี่',data:[gen.energy,gen.avgPower,gen.peakPower],backgroundColor:'rgba(255,159,67,.7)',borderColor:'#ff9f43',borderWidth:2}
+        data:{labels:['พลังงานสะสม (kWh)'],datasets:[
+          {label:'ไฟบ้าน',data:[home.energy],backgroundColor:'rgba(107,203,119,.7)',borderColor:'#6bcb77',borderWidth:2},
+          {label:'เครื่องปั่นไฟจากแบตเตอรี่',data:[gen.energy],backgroundColor:'rgba(255,159,67,.7)',borderColor:'#ff9f43',borderWidth:2}
         ]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#ccd6f6'}},tooltip:{backgroundColor:'#1a1a2e',titleColor:'#00d4ff',bodyColor:'#ccd6f6'}},scales:{x:{ticks:{color:'#8892b0'},grid:{color:'#1e1e3a'}},y:{beginAtZero:true,ticks:{color:'#8892b0'},grid:{color:'#1e1e3a'}}}}
       });

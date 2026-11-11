@@ -1,692 +1,160 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ผลการทดลอง - EV Charging Research</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f8f7">
+<title>ผลทดลอง EV Charging | EV Lab</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #0f0f1a;
-    color: #e0e0e0;
-    min-height: 100vh;
-  }
-  .header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 30px 40px;
-    border-bottom: 3px solid #00d4ff;
-  }
-  .header h1 { font-size: 28px; color: #00d4ff; margin-bottom: 5px; }
-  .header .subtitle { font-size: 14px; color: #8892b0; }
-
-  .selector-wrapper {
-    background: linear-gradient(145deg, #1a1a2e, #16213e);
-    border: 1px solid #2a2a4a;
-    border-radius: 12px;
-    padding: 22px 25px;
-    margin-bottom: 30px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .selector-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
-  .selector-group label {
-    font-size: 12px; font-weight: 700; color: #00d4ff;
-    text-transform: uppercase; letter-spacing: 1px;
-  }
-  .selector-group select {
-    padding: 11px 15px; border-radius: 8px;
-    border: 1px solid #2a2a4a; background: #0f0f1a; color: #e0e0e0;
-    font-size: 15px; cursor: pointer; outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .selector-group select:hover, .selector-group select:focus {
-    border-color: #00d4ff; box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
-  }
-  .selector-group select option { background: #1a1a2e; color: #e0e0e0; }
-
-  .loading {
-    text-align: center; padding: 60px 20px; color: #8892b0; font-size: 18px;
-  }
-  .loading .spinner {
-    display: inline-block; width: 40px; height: 40px;
-    border: 3px solid #2a2a4a; border-top-color: #00d4ff;
-    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
-
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px; margin-bottom: 30px;
-  }
-  .stat-card {
-    background: linear-gradient(145deg, #1a1a2e, #16213e);
-    border: 1px solid #2a2a4a; border-radius: 12px;
-    padding: 20px; text-align: center;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .stat-card:hover { transform: translateY(-3px); border-color: #00d4ff; }
-  .stat-card .label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
-    color: #8892b0; margin-bottom: 8px;
-  }
-  .stat-card .value { font-size: 24px; font-weight: 700; color: #00d4ff; }
-  .stat-card .unit { font-size: 13px; color: #8892b0; margin-top: 2px; }
-
-  .chart-section {
-    background: #1a1a2e; border: 1px solid #2a2a4a;
-    border-radius: 12px; padding: 25px; margin-bottom: 25px;
-  }
-  .chart-section h2 {
-    font-size: 18px; color: #ccd6f6; margin-bottom: 15px;
-    padding-bottom: 10px; border-bottom: 1px solid #2a2a4a;
-  }
-  .chart-wrapper { position: relative; height: 380px; }
-  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
-
-  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-  table.data-table th {
-    background: #16213e; color: #00d4ff; padding: 10px 8px;
-    text-align: center; font-weight: 600; position: sticky; top: 0;
-  }
-  table.data-table td {
-    padding: 6px 8px; text-align: center;
-    border-bottom: 1px solid #2a2a4a; color: #ccd6f6;
-  }
-  table.data-table tr:hover td { background: #16213e; }
-  .table-container { max-height: 450px; overflow-y: auto; border-radius: 8px; border: 1px solid #2a2a4a; }
-
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  .badge-home { background: #6bcb7722; color: #6bcb77; border: 1px solid #6bcb7744; }
-  .badge-gen  { background: #ffd93d22; color: #ffd93d; border: 1px solid #ffd93d44; }
-
-  .footer { text-align: center; padding: 20px; color: #555; font-size: 12px; }
-
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes slideInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
-  .header { animation: slideInLeft 0.8s ease-out; }
-  .chart-section { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
-  .chart-section.visible { opacity: 1; transform: translateY(0); }
-
-  @media (max-width: 768px) {
-    .chart-row { grid-template-columns: 1fr; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .selector-wrapper { flex-direction: column; align-items: stretch; }
-    .header { padding: 22px 20px; }
-    .header h1 { font-size: 22px; }
-  }
-/* ===== Power source comparison ===== */
-  .power-compare { border: 2px solid #00d4ff; }
-  .source-toggle {
-    display: flex; gap: 12px; margin: 18px 0 20px; flex-wrap: wrap;
-  }
-  .toggle-btn {
-    flex: 1; min-width: 150px; padding: 16px 20px;
-    background: #16213e; border: 2px solid #2a2a4a; border-radius: 12px;
-    color: #8892b0; font-size: 16px; font-weight: 700; cursor: pointer;
-    transition: all 0.2s; font-family: inherit;
-  }
-  .toggle-btn:hover { border-color: #00d4ff; color: #ccd6f6; transform: translateY(-2px); }
-  .toggle-btn.active { color: #fff; border-color: #6bcb77; background: linear-gradient(135deg,#0f3460,#16213e); box-shadow: 0 6px 20px rgba(107,203,119,0.25); }
-  .toggle-btn[data-source="gen"].active { border-color: #ff9f43; box-shadow: 0 6px 20px rgba(255,159,67,0.25); }
-  .toggle-btn[data-source="compare"].active { border-color: #00d4ff; box-shadow: 0 6px 20px rgba(0,212,255,0.25); }
-
-  .params-panel {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px; margin-bottom: 22px; padding: 18px;
-    background: #16213e; border-radius: 10px; border: 1px solid #2a2a4a;
-  }
-  .param-item { display: flex; flex-direction: column; gap: 5px; }
-  .param-item label { font-size: 12px; color: #8892b0; }
-  .param-item input {
-    background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 6px;
-    color: #00d4ff; padding: 9px 10px; font-size: 15px; font-weight: 600; font-family: inherit;
-  }
-  .param-item input:focus { outline: none; border-color: #00d4ff; }
-
-  .verdict-box {
-    border-radius: 12px; padding: 20px 24px; margin-bottom: 22px;
-    text-align: center; border: 2px solid;
-    transition: all 0.3s;
-  }
-  .verdict-box .vlabel { font-size: 12px; color: #8892b0; letter-spacing: 1.5px; text-transform: uppercase; }
-  .verdict-box .vwinner { font-size: 26px; font-weight: 800; margin: 6px 0; }
-  .verdict-box .vdetail { font-size: 14px; color: #ccd6f6; }
-  .verdict-box.win-home { background: linear-gradient(135deg,#16213e,#1a1a2e); border-color: #6bcb77; }
-  .verdict-box.win-home .vwinner { color: #6bcb77; }
-  .verdict-box.win-gen { background: linear-gradient(135deg,#16213e,#1a1a2e); border-color: #ff9f43; }
-  .verdict-box.win-gen .vwinner { color: #ff9f43; }
-
-  .cost-card-home .value { color: #6bcb77; }
-  .cost-card-gen .value { color: #ff9f43; }
-
-  .data-note { font-size: 12px; color: #8892b0; margin-top: 14px; line-height: 1.7; }
-  .data-note code { background: #16213e; padding: 2px 6px; border-radius: 4px; color: #00d4ff; }
-
-  @media (max-width: 768px) {
-    .chart-row { grid-template-columns: 1fr; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .toggle-btn { min-width: 100%; }
-  }
-
-
-  .report-nav{position:sticky;top:0;z-index:20;display:flex;gap:10px;flex-wrap:wrap;padding:12px 20px;background:rgba(15,15,26,.96);border-bottom:1px solid #2a2a4a;backdrop-filter:blur(8px)}
-  .report-nav a,.report-embed-link{color:#00d4ff;text-decoration:none;border:1px solid #2a2a4a;border-radius:8px;padding:9px 14px;font-weight:600}
-  .report-nav a:hover,.report-embed-link:hover{border-color:#00d4ff;background:#16213e}
-  .report-embed{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:18px;margin:28px 20px}
-  .report-embed-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-  .report-embed h2{color:#00d4ff;font-size:20px}
-  .report-embed iframe{display:block;width:100%;height:85vh;min-height:720px;border:1px solid #2a2a4a;border-radius:8px;background:#0f0f1a}
-  @media(max-width:700px){.report-embed{margin:20px 10px;padding:12px}.report-embed iframe{height:75vh;min-height:600px}}
-
-  .cost-compare{max-width:1100px;margin:24px auto;padding:26px}
-  .cost-compare>h2{font-size:24px;color:#f1f5ff;margin-bottom:8px}
-  .cost-intro{color:#aab5cf;margin-bottom:18px}
-  .rate-settings,.cost-details{background:#141b2e;border:1px solid #2a3550;border-radius:10px;padding:13px 16px;margin:14px 0;color:#ccd6f6}
-  .rate-settings summary,.cost-details summary{cursor:pointer;font-weight:700;color:#00d4ff}
-  .rate-settings .params-panel{margin:14px 0 0;padding:14px}
-  .cost-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}
-  .cost-option,.cost-verdict{padding:20px;border-radius:12px;background:#16213e;border:1px solid #2a3550}
-  .home-option{border-top:3px solid #6bcb77}.generator-option{border-top:3px solid #ff9f43}
-  .cost-verdict{background:#102a36;border-color:#00d4ff}
-  .cost-label{color:#aab5cf;font-size:14px;font-weight:700}
-  .cost-amount{font-size:30px;font-weight:800;color:#f4f7ff;margin:12px 0 7px}
-  .cost-amount span{font-size:16px;font-weight:600}
-  .home-option .cost-amount{color:#6bcb77}.generator-option .cost-amount{color:#ffb05f}.cost-verdict .cost-amount{color:#00d4ff}
-  .cost-caption{font-size:13px;color:#aab5cf;line-height:1.6}
-  .cost-chart{padding:18px;margin-bottom:14px}.cost-chart h2{font-size:17px}.cost-chart .chart-wrapper{height:210px}
-  .cost-details .data-note{margin-top:12px}.cost-details p{margin:8px 0}
-  .cost-footnote{font-size:12px;color:#8892b0;line-height:1.6;margin-top:12px}
-  @media(max-width:760px){.cost-compare{margin:18px 10px;padding:18px}.cost-results{grid-template-columns:1fr}.cost-amount{font-size:27px}}
+:root{--ink:#172b2a;--muted:#637674;--line:#dce6e2;--paper:#fff;--wash:#f4f8f6;--green:#087e68;--green2:#dff3ec;--amber:#ca6b2c;--amber2:#fff0e4;--blue:#4378a4;--shadow:0 12px 35px #16352a0d}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--wash);color:var(--ink);font-family:"Leelawadee UI","Noto Sans Thai",Tahoma,system-ui,sans-serif;line-height:1.65}a{color:inherit}.shell{max-width:1180px;margin:auto;padding:0 24px}
+.topbar{position:sticky;top:0;z-index:20;background:#f4f8f6ed;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font-weight:850;letter-spacing:.02em;white-space:nowrap}.brand b{color:var(--green)}.navlinks{display:flex;gap:8px;align-items:center}.navlinks a{text-decoration:none;color:var(--muted);padding:9px 12px;border-radius:9px;font-size:14px}.navlinks a:hover{background:var(--green2);color:var(--green)}
+.hero{padding:66px 0 34px;background:radial-gradient(ellipse at 85% 0%,#d9efe6 0,transparent 36%)}.eyebrow{color:var(--green);font-size:13px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.hero h1{font-size:clamp(34px,5vw,58px);letter-spacing:-.04em;line-height:1.12;margin:12px 0 16px;max-width:780px}.hero p{max-width:690px;color:var(--muted);font-size:18px;margin:0}.hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px;color:#3b5651;font-size:13px;font-weight:650}
+main{padding-bottom:60px}.section{padding:32px 0 12px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:0 0 18px}.section-kicker{color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.13em;font-weight:800}.section h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.025em;line-height:1.2;margin:5px 0 0}.section-intro{color:var(--muted);margin:8px 0 0;max-width:760px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.controls{padding:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:6px}.field select,.field input{width:100%;background:#fbfdfc;border:1px solid var(--line);border-radius:10px;padding:12px 13px;color:var(--ink);font:inherit;font-weight:650}.field select:focus,.field input:focus{outline:3px solid #087e6825;border-color:var(--green)}
+.readout{margin-top:14px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.readout strong{font-size:16px}.readout span{font-size:13px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.kpi{padding:17px 18px}.kpi-label{color:var(--muted);font-size:12px;font-weight:700}.kpi-value{font-size:25px;font-weight:850;letter-spacing:-.03em;margin-top:5px}.kpi-unit{font-size:12px;color:var(--muted)}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.chart-panel{padding:18px 20px;min-width:0}.chart-title{font-size:15px;font-weight:800;margin:0 0 3px}.chart-subtitle{font-size:12px;color:var(--muted);margin:0 0 10px}.chartbox{height:275px;position:relative}
+details{background:var(--paper);border:1px solid var(--line);border-radius:14px}details>summary{padding:15px 18px;cursor:pointer;font-weight:750;color:#36534d}details>summary::marker{color:var(--green)}.detail-body{padding:0 18px 18px;color:var(--muted);font-size:13px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}th,td{padding:9px 11px;text-align:right;border-bottom:1px solid #edf1ef;white-space:nowrap}th{background:#f4f8f6;color:#46615b;font-weight:800;position:sticky;top:0}td:first-child,th:first-child{text-align:left}tbody tr:last-child td{border-bottom:0}
+.cost-settings{margin:14px 0}.cost-settings .detail-body{padding-top:4px}.rate-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cost-results{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}.cost-card{padding:21px;border-top:4px solid var(--green)}.cost-card.generator{border-top-color:var(--amber)}.cost-card.saving{background:#eaf6f1;border-color:#cde9dd}.cost-label{color:var(--muted);font-size:13px;font-weight:750}.cost-value{font-size:32px;font-weight:900;letter-spacing:-.04em;margin:10px 0 2px}.generator .cost-value{color:var(--amber)}.saving .cost-value{color:var(--green)}.cost-foot{font-size:12px;color:var(--muted);line-height:1.5}
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.insight{padding:20px}.insight-num{font-size:12px;color:var(--green);font-weight:850;letter-spacing:.1em}.insight h3{font-size:17px;margin:8px 0}.insight p{font-size:13px;color:var(--muted);margin:0}
+.system-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;overflow:hidden}.flow-step{padding:19px;background:white;border-right:1px solid var(--line)}.flow-step:last-child{border:0}.flow-step small{display:block;color:var(--green);font-weight:800}.flow-step strong{display:block;margin:6px 0}.flow-step span{font-size:12px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin:12px 2px}.status{padding:32px;text-align:center;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:26px 0 38px;color:var(--muted);font-size:12px}
+@media(max-width:800px){.shell{padding:0 17px}.nav{min-height:60px}.navlinks{gap:0}.navlinks a{font-size:12px;padding:8px}.hero{padding:45px 0 26px}.hero p{font-size:16px}.kpis{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}.chartbox{height:250px}.insights{grid-template-columns:1fr}.system-flow{grid-template-columns:repeat(2,1fr)}.flow-step:nth-child(2){border-right:0}.flow-step:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:520px){.nav{align-items:flex-start;padding:12px 0;flex-direction:column;gap:5px}.navlinks{width:100%;overflow:auto}.navlinks a{white-space:nowrap}.controls,.cost-results{grid-template-columns:1fr}.section-head{display:block}.readout{align-items:flex-start;flex-direction:column}.rate-fields{grid-template-columns:1fr}.kpi{padding:14px}.kpi-value{font-size:22px}.system-flow{grid-template-columns:1fr}.flow-step{border-right:0;border-bottom:1px solid var(--line)!important}.flow-step:last-child{border-bottom:0!important}}
 </style>
 </head>
 <body>
-
-<nav class="report-nav" aria-label="รายงาน EV">
-  <a href="#results">ผลทดลองแบบเลือกค่า</a>
-  <a href="#cost-comparison">เปรียบเทียบผลทดลอง</a>
-  <a href="#analysis-report">วิเคราะห์ Loss / แบต</a>
-  <a href="#summary-report">สรุปผลการวิจัย</a>
-</nav>
-
-<div class="header" id="results">
-  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
-    <div>
-      <h1>ผลการทดลอง — EV Charging Research</h1>
-      <div class="subtitle" id="headerSubtitle">
-        วิเคราะห์โปรไฟล์การชาร์จรถยนต์ไฟฟ้า &nbsp;
-        <span class="badge badge-home" id="headerBadge">REAL DATA</span>
-        &nbsp;|&nbsp; <span id="headerSource">กำลังโหลด...</span>
-      </div>
-    </div>
-    <a href="analysis.html" style="padding:10px 22px; border-radius:8px; border:1px solid #00d4ff; background:rgba(0,212,255,0.1); color:#00d4ff; font-size:14px; text-decoration:none; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,212,255,0.25)'" onmouseout="this.style.background='rgba(0,212,255,0.1)'">📊 วิเคราะห์ Loss / แบต</a>
-  </div>
+<header class="topbar"><div class="shell nav"><a class="brand" href="#top" aria-label="EV Lab หน้าแรก">EV <b>LAB</b> / ผลทดลอง</a><nav class="navlinks" aria-label="เมนูหลัก"><a href="#ทดลอง">ผลทดลอง</a><a href="#ต้นทุน">ค่าใช้จ่าย</a><a href="#สรุป">สรุปผล</a></nav></div></header>
+<div id="top" class="hero"><div class="shell"><div class="eyebrow">EV charging research · รายงานผลทดลอง</div><h1>เครื่องปั่นไฟจากแบตเตอรี่<br>ชาร์จรถ EV ได้แค่ไหน?</h1><p>สำรวจผลทดลองจริง เปรียบเทียบกับไฟบ้าน และดูต้นทุนในหน้าเดียว เลือกรุ่นรถกับกระแสไฟเพื่อสำรวจข้อมูลชุดเดียวกันได้ทันที</p><div class="hero-meta"><span class="pill">รถ MG ZS EV · RD6</span><span class="pill">8A · 10A · 13A · 16A</span><span class="pill">ข้อมูลวัดจริงจาก CSV</span></div></div></div>
+<main class="shell">
+<section class="section" id="ทดลอง">
+<div class="section-head"><div><div class="section-kicker">01 / ข้อมูลทดลอง</div><h2>สำรวจผลตามรถและกระแส</h2><p class="section-intro">เลือกชุดข้อมูลที่ต้องการดู กราฟและตัวเลขด้านล่างจะอัปเดตตาม CSV ของการทดลองนั้น</p></div></div>
+<div class="panel controls">
+<div class="field"><label for="sourceSelector">แหล่งจ่ายไฟ</label><select id="sourceSelector"><option value="home">ไฟบ้าน · 230V AC</option><option value="generator">เครื่องปั่นไฟจากแบตเตอรี่</option></select></div>
+<div class="field"><label for="carSelector">รุ่นรถ</label><select id="carSelector"><option value="mg">MG ZS EV</option><option value="rd6">RD6 Riddara</option></select></div>
+<div class="field"><label for="currentSelector">กระแสชาร์จ</label><select id="currentSelector"></select></div>
 </div>
-
-<div class="container">
-
-  <div class="selector-wrapper">
-    <div class="selector-group">
-      <label>แหล่งไฟฟ้า</label>
-      <select id="sourceSelector">
-        <option value="home">🏠 ไฟบ้าน (230V AC)</option>
-        <option value="generator">⚙️ เครื่องปั่นไฟ</option>
-      </select>
-    </div>
-    <div class="selector-group">
-      <label>รุ่นรถ</label>
-      <select id="carSelector">
-        <option value="mg">MG ZS EV</option>
-        <option value="rd6">RD6 Riddara</option>
-      </select>
-    </div>
-    <div class="selector-group">
-      <label>กระแสไฟฟ้า</label>
-      <select id="currentSelector"></select>
-    </div>
-  </div>
-
-  <div id="loadingArea" class="loading">
-    <div class="spinner"></div><br>
-    กำลังโหลดข้อมูล...
-  </div>
-
-  <div id="reportArea" style="display:none;">
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="label">พลังงานรวม (คำนวณ)</div>
-        <div class="value" id="statTotalEnergy">-</div>
-        <div class="unit">kWh</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">พลังงาน Tuya (ส่วนต่าง)</div>
-        <div class="value" id="statTuyaDelta">-</div>
-        <div class="unit">kWh</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">กำลังสูงสุด</div>
-        <div class="value" id="statPeakPower">-</div>
-        <div class="unit">kW</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">กำลังเฉลี่ย</div>
-        <div class="value" id="statAvgPower">-</div>
-        <div class="unit">kW</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">อุณหภูมิสูงสุด</div>
-        <div class="value" id="statTemp">-</div>
-        <div class="unit" id="statTempRise">-</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">แรงดันเฉลี่ย</div>
-        <div class="value" id="statAvgVoltage">-</div>
-        <div class="unit">V</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">กระแสเฉลี่ย</div>
-        <div class="value" id="statAvgCurrent">-</div>
-        <div class="unit">A</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">ระยะเวลา</div>
-        <div class="value" id="statDuration">-</div>
-        <div class="unit" id="statSamples">-</div>
-      </div>
-    </div>
-
-    <div class="chart-section">
-      <h2>กราฟกำลังไฟฟ้าและอุณหภูมิ</h2>
-      <div class="chart-wrapper"><canvas id="chartPowerTemp"></canvas></div>
-    </div>
-
-    <div class="chart-row">
-      <div class="chart-section">
-        <h2>กราฟแรงดันไฟฟ้า</h2>
-        <div class="chart-wrapper"><canvas id="chartVoltage"></canvas></div>
-      </div>
-      <div class="chart-section">
-        <h2>กราฟกระแสไฟฟ้า</h2>
-        <div class="chart-wrapper"><canvas id="chartCurrent"></canvas></div>
-      </div>
-    </div>
-
-    <div class="chart-row">
-      <div class="chart-section">
-        <h2>พลังงานสะสม (kWh)</h2>
-        <div class="chart-wrapper"><canvas id="chartEnergy"></canvas></div>
-      </div>
-      <div class="chart-section">
-        <h2>ค่าความต้านทาน (&#8486;)</h2>
-        <div class="chart-wrapper"><canvas id="chartResistance"></canvas></div>
-      </div>
-    </div>
-
-    <div class="chart-section">
-      <h2>เปรียบเทียบพลังงาน Tuya vs คำนวณ</h2>
-      <div class="chart-wrapper"><canvas id="chartEnergyCompare"></canvas></div>
-    </div>
-
-    <div class="chart-section">
-      <h2 id="dataLogTitle">ข้อมูลดิบ</h2>
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>เวลา (นาที)</th>
-              <th>แรงดัน (V)</th>
-              <th>กระแส (A)</th>
-              <th>ความต้านทาน (&#8486;)</th>
-              <th>กำลัง (kW)</th>
-              <th>อุณหภูมิ (&#176;C)</th>
-              <th>อุณหภูมิเพิ่ม (&#176;C)</th>
-              <th>พลังงานคำนวณ (kWh)</th>
-              <th>Tuya Raw (kWh)</th>
-            </tr>
-          </thead>
-          <tbody id="dataTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-
+<div id="loadingArea" class="panel status">กำลังอ่านข้อมูลทดลอง…</div>
+<div id="reportArea" style="display:none">
+<div class="panel readout"><strong id="selectionTitle">—</strong><span id="selectionMeta">ข้อมูลจาก CSV</span></div>
+<div class="kpis">
+<div class="panel kpi"><div class="kpi-label">พลังงานที่คำนวณได้</div><div class="kpi-value" id="statTotalEnergy">—</div><div class="kpi-unit">kWh</div></div>
+<div class="panel kpi"><div class="kpi-label">กำลังไฟเฉลี่ย</div><div class="kpi-value" id="statAvgPower">—</div><div class="kpi-unit">kW</div></div>
+<div class="panel kpi"><div class="kpi-label">กำลังไฟสูงสุด</div><div class="kpi-value" id="statPeakPower">—</div><div class="kpi-unit">kW</div></div>
+<div class="panel kpi"><div class="kpi-label">อุณหภูมิสูงสุด</div><div class="kpi-value" id="statTemp">—</div><div class="kpi-unit" id="statTempRise">ระหว่างการทดลอง</div></div>
 </div>
+<div class="chart-grid">
+<article class="panel chart-panel"><h3 class="chart-title">กำลังไฟระหว่างชาร์จ</h3><p class="chart-subtitle">กำลังไฟที่วัดได้ตามเวลา</p><div class="chartbox"><canvas id="chartPower"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">พลังงานสะสม</h3><p class="chart-subtitle">เปรียบเทียบค่าคำนวณกับมิเตอร์ Tuya</p><div class="chartbox"><canvas id="chartEnergy"></canvas></div></article>
+</div>
+<details style="margin-top:14px"><summary>ข้อมูลละเอียดของชุดทดลองนี้</summary><div class="detail-body">
+<div class="kpis" style="margin:0 0 14px">
+<div class="panel kpi"><div class="kpi-label">แรงดันเฉลี่ย</div><div class="kpi-value" id="statAvgVoltage">—</div><div class="kpi-unit">V</div></div>
+<div class="panel kpi"><div class="kpi-label">กระแสเฉลี่ย</div><div class="kpi-value" id="statAvgCurrent">—</div><div class="kpi-unit">A</div></div>
+<div class="panel kpi"><div class="kpi-label">พลังงานจากมิเตอร์ Tuya</div><div class="kpi-value" id="statTuyaDelta">—</div><div class="kpi-unit">kWh</div></div>
+<div class="panel kpi"><div class="kpi-label">ระยะเวลา</div><div class="kpi-value" id="statDuration">—</div><div class="kpi-unit">นาที</div></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>เวลา (นาที)</th><th>แรงดัน (V)</th><th>กระแส (A)</th><th>ความต้านทาน (Ω)</th><th>กำลัง (kW)</th><th>อุณหภูมิ (°C)</th><th>พลังงานคำนวณ (kWh)</th><th>Tuya Raw (kWh)</th></tr></thead><tbody id="dataTableBody"></tbody></table></div>
+</div></details>
+</div>
+</section>
 
-<div class="footer">ผลการทดลอง EV Charging Research | Dynamic Report</div>
+<section class="section" id="ต้นทุน">
+<div class="section-head"><div><div class="section-kicker">02 / เปรียบเทียบต้นทุน</div><h2>ค่าใช้จ่ายต่อการทดลอง</h2><p class="section-intro">เทียบพลังงานจากมิเตอร์ไฟบ้านกับพลังงานแบตเตอรี่ที่ใช้ไปกับเครื่องปั่นไฟ สำหรับรถและกระแสที่เลือกด้านบน</p></div></div>
+<details class="cost-settings"><summary>ปรับอัตราค่าไฟที่ใช้คำนวณ</summary><div class="detail-body"><div class="rate-fields">
+<div class="field"><label for="compareBaseRate">ค่าไฟฐาน (บาท/kWh)</label><input id="compareBaseRate" type="number" value="4.2218" min="0" step="0.0001"></div>
+<div class="field"><label for="compareFtRate">ค่า Ft (บาท/kWh)</label><input id="compareFtRate" type="number" value="0" step="0.01"></div>
+<div class="field"><label for="compareVatRate">VAT (%)</label><input id="compareVatRate" type="number" value="7" min="0" step="0.1"></div>
+</div></div></details>
+<div class="cost-results" id="experimentCompare"><div class="panel status">กำลังคำนวณค่าใช้จ่าย…</div></div>
+<div class="panel chart-panel"><h3 class="chart-title">เปรียบเทียบค่าใช้จ่าย</h3><p class="chart-subtitle">บาทต่อการทดลองที่เลือก</p><div class="chartbox" style="height:220px"><canvas id="chartExperimentalCompare"></canvas></div></div>
+<p class="note">หมายเหตุ: ค่าเครื่องปั่นไฟเป็นค่าประมาณ โดยใช้เปอร์เซ็นต์แบตเตอรี่ที่เหลือจากผลทดลองเพื่อคำนวณพลังงานที่ใช้ไป ค่าไฟจริงอาจเปลี่ยนตามอัตราค่าไฟและประสิทธิภาพการชาร์จกลับ</p>
+</section>
+
+<section class="section" id="สรุป">
+<div class="section-head"><div><div class="section-kicker">03 / สรุปผลระบบ</div><h2>สิ่งที่ผลทดลองบอกเรา</h2><p class="section-intro">มองภาพรวมของระบบและตัวเลขสำคัญ โดยไม่ต้องไล่ดูกราฟซ้ำหลายชุด</p></div></div>
+<div class="panel system-flow">
+<div class="flow-step"><small>01 · แหล่งพลังงาน</small><strong>แบตเตอรี่ 72V 100Ah</strong><span>ความจุ 7.2 kWh</span></div>
+<div class="flow-step"><small>02 · แปลงพลังงาน</small><strong>มอเตอร์ FW15-7000</strong><span>ประสิทธิภาพประมาณ 91%</span></div>
+<div class="flow-step"><small>03 · ผลิตไฟ AC</small><strong>เครื่องปั่นไฟ</strong><span>ประสิทธิภาพประมาณ 85%</span></div>
+<div class="flow-step"><small>04 · ชาร์จรถ</small><strong>หัวชาร์จรถ EV</strong><span>ประสิทธิภาพประมาณ 68–78%</span></div>
+</div>
+<div class="insights" style="margin-top:14px">
+<article class="panel insight"><div class="insight-num">01 · กำลังไฟ</div><h3>จ่ายไฟได้ใกล้เคียงกัน</h3><p>ที่ 16A กำลังชาร์จอยู่ที่ MG 3.61 kW และ RD6 3.55 kW ต่างกันไม่มากในชุดทดลองนี้</p></article>
+<article class="panel insight"><div class="insight-num">02 · ระยะที่ได้</div><h3>รถแบตเล็กได้ SOC เพิ่มมากกว่า</h3><p>ชาร์จ 1 ชั่วโมงที่ 16A: MG เพิ่มประมาณ 4.9% ส่วน RD6 เพิ่ม 3.8% เนื่องจากความจุแบตเตอรี่ต่างกัน</p></article>
+<article class="panel insight"><div class="insight-num">03 · พลังงานคงเหลือ</div><h3>กระแสสูงใช้แบตต้นทางเร็วขึ้น</h3><p>หลังชาร์จ 1 ชั่วโมงที่ 16A แบตเตอรี่เครื่องปั่นเหลือประมาณ 35% (MG) และ 36% (RD6)</p></article>
+</div>
+<div class="panel" style="padding:20px;margin-top:14px">
+<h3 style="margin:0 0 10px;font-size:17px">ตารางผลทดลองจากเครื่องปั่นไฟ · 1 ชั่วโมง</h3>
+<div class="table-wrap"><table><thead><tr><th>กระแส</th><th>MG กำลัง (kW)</th><th>MG SOC เพิ่ม</th><th>แบตต้นทางเหลือ</th><th>RD6 กำลัง (kW)</th><th>RD6 SOC เพิ่ม</th><th>แบตต้นทางเหลือ</th></tr></thead><tbody>
+<tr><td>8A</td><td>1.85</td><td>+2.9%</td><td>67%</td><td>1.82</td><td>+2.3%</td><td>67%</td></tr>
+<tr><td>10A</td><td>2.30</td><td>+3.4%</td><td>59%</td><td>2.27</td><td>+2.7%</td><td>59%</td></tr>
+<tr><td>13A</td><td>2.96</td><td>+4.2%</td><td>47%</td><td>2.92</td><td>+3.3%</td><td>48%</td></tr>
+<tr><td>16A</td><td>3.61</td><td>+4.9%</td><td>35%</td><td>3.55</td><td>+3.8%</td><td>36%</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel" style="padding:19px;margin-top:14px;background:#fffaf4;border-color:#f1dfcb"><strong>ประสิทธิภาพรวมที่ประเมินได้: 53–60%</strong><div class="cost-foot">พลังงานสูญเสียเกิดขึ้นระหว่างแปลงจากแบตเตอรี่เป็นไฟ AC และการชาร์จเข้ารถ ค่านี้สรุปจากช่วงกระแสที่ทดลอง</div></div>
+</section>
+</main>
+<footer><div class="shell">EV Charging Research · ผลทดลอง MG ZS EV และ RD6 Riddara · ใช้ข้อมูล CSV ใน repository</div></footer>
 
 <script>
-var charts = {};
-
-var CSV_FILES = {
-  home: {
-    mg: [
-      { file: 'home_mg_8A.csv',  label: '8A' },
-      { file: 'home_mg_10A.csv', label: '10A' },
-      { file: 'home_mg_13A.csv', label: '13A' },
-      { file: 'home_mg_16A.csv', label: '16A' }
-    ],
-    rd6: [
-      { file: 'home_rd6_8A.csv',  label: '8A' },
-      { file: 'home_rd6_10A.csv', label: '10A' },
-      { file: 'home_rd6_13A.csv', label: '13A' },
-      { file: 'home_rd6_16A.csv', label: '16A' }
-    ]
-  },
-  generator: {
-    mg: [
-      { file: 'gen_mg_8A.csv',  label: '8A' },
-      { file: 'gen_mg_10A.csv', label: '10A' },
-      { file: 'gen_mg_13A.csv', label: '13A' },
-      { file: 'gen_mg_16A.csv', label: '16A' }
-    ],
-    rd6: [
-      { file: 'gen_rd6_8A.csv',  label: '8A' },
-      { file: 'gen_rd6_10A.csv', label: '10A' },
-      { file: 'gen_rd6_13A.csv', label: '13A' },
-      { file: 'gen_rd6_16A.csv', label: '16A' }
-    ]
-  }
+var charts={};
+var CSV_FILES={
+ home:{mg:[{file:'home_mg_8A.csv',label:'8A'},{file:'home_mg_10A.csv',label:'10A'},{file:'home_mg_13A.csv',label:'13A'},{file:'home_mg_16A.csv',label:'16A'}],rd6:[{file:'home_rd6_8A.csv',label:'8A'},{file:'home_rd6_10A.csv',label:'10A'},{file:'home_rd6_13A.csv',label:'13A'},{file:'home_rd6_16A.csv',label:'16A'}]},
+ generator:{mg:[{file:'gen_mg_8A.csv',label:'8A'},{file:'gen_mg_10A.csv',label:'10A'},{file:'gen_mg_13A.csv',label:'13A'},{file:'gen_mg_16A.csv',label:'16A'}],rd6:[{file:'gen_rd6_8A.csv',label:'8A'},{file:'gen_rd6_10A.csv',label:'10A'},{file:'gen_rd6_13A.csv',label:'13A'},{file:'gen_rd6_16A.csv',label:'16A'}]}
 };
-
-var CAR_NAMES = { mg: 'MG ZS EV', rd6: 'RD6 Riddara' };
-var SOURCE_NAMES = { home: 'ไฟบ้าน (230V AC)', generator: 'เครื่องปั่นไฟ' };
-
-function getCurrentFiles() {
-  var source = document.getElementById('sourceSelector').value;
-  var car = document.getElementById('carSelector').value;
-  return CSV_FILES[source][car];
+var CAR_NAMES={mg:'MG ZS EV',rd6:'RD6 Riddara'};
+function selected(source){var car=document.getElementById('carSelector').value,current=document.getElementById('currentSelector').value,list=CSV_FILES[source][car];return list.find(function(x){return x.file===current;})||list[0];}
+function parseCSV(text){var lines=text.trim().split(/\r?\n/),delimiter=lines[0].indexOf('\t')>=0?'\t':',',keys=lines[0].split(delimiter).map(function(x){return x.trim();});return lines.slice(1).map(function(line){var vals=line.split(delimiter),r={};keys.forEach(function(k,i){r[k]=(vals[i]||'').trim();});return r;}).filter(function(r){return Object.keys(r).length>0;});}
+function loadCSV(file){return fetch('data/'+file).then(function(r){if(!r.ok)throw new Error('โหลด '+file+' ไม่สำเร็จ');return r.text();}).then(function(t){var all=parseCSV(t),rows=all.filter(function(r){return (+r['Power(kW)'])>0&&(+r['Current(A)'])>0;});return rows.length?rows:all;});}
+function values(rows,key){return rows.map(function(r){var n=parseFloat(r[key]);return Number.isFinite(n)?n:0;});}
+function avg(a){return a.reduce(function(x,y){return x+y;},0)/(a.length||1);}
+function fmt(n,d){return Number.isFinite(n)?n.toFixed(d):'—';}
+function set(id,value){document.getElementById(id).textContent=value;}
+function populateCurrent(){var sel=document.getElementById('currentSelector'),car=document.getElementById('carSelector').value,source=document.getElementById('sourceSelector').value,previous=sel.value;sel.innerHTML='';CSV_FILES[source][car].forEach(function(item){var o=document.createElement('option');o.value=item.file;o.textContent=item.label;sel.appendChild(o);});if(CSV_FILES[source][car].some(function(x){return x.file===previous;}))sel.value=previous;}
+function chartBase(){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#637674',usePointStyle:true,boxWidth:8}},tooltip:{backgroundColor:'#172b2a',titleColor:'#fff',bodyColor:'#fff'}},scales:{x:{ticks:{color:'#637674',maxTicksLimit:9},grid:{color:'#edf1ef'}},y:{beginAtZero:true,ticks:{color:'#637674'},grid:{color:'#edf1ef'}}}};}
+function drawCharts(rows){
+ Object.keys(charts).forEach(function(k){charts[k].destroy();});
+ var time=values(rows,'Time_Min'),power=values(rows,'Power(kW)'),energy=values(rows,'Calculated_Energy(kWh)'),tuya=values(rows,'Tuya_Raw_Energy(kWh)');
+ charts.power=new Chart(document.getElementById('chartPower'),{type:'line',data:{labels:time,datasets:[{label:'กำลังไฟ (kW)',data:power,borderColor:'#087e68',backgroundColor:'#087e6814',fill:true,borderWidth:2,tension:.25,pointRadius:0}]},options:chartBase()});
+ var energy0=energy[0]||0,tuya0=tuya[0]||0;
+ charts.energy=new Chart(document.getElementById('chartEnergy'),{type:'line',data:{labels:time,datasets:[{label:'คำนวณ (kWh)',data:energy.map(function(v){return v-energy0;}),borderColor:'#087e68',borderWidth:2,tension:.25,pointRadius:0},{label:'Tuya (kWh)',data:tuya.map(function(v){return v-tuya0;}),borderColor:'#4378a4',borderDash:[5,4],borderWidth:2,tension:.25,pointRadius:0}]},options:chartBase()});
 }
-
-function populateCurrentSelector() {
-  var sel = document.getElementById('currentSelector');
-  sel.innerHTML = '';
-  getCurrentFiles().forEach(function(item) {
-    var opt = document.createElement('option');
-    opt.value = item.file;
-    opt.textContent = item.label;
-    sel.appendChild(opt);
-  });
+function renderData(){
+ var file=selected(document.getElementById('sourceSelector').value),source=document.getElementById('sourceSelector').value,car=document.getElementById('carSelector').value;
+ document.getElementById('loadingArea').style.display='block';document.getElementById('reportArea').style.display='none';document.getElementById('loadingArea').textContent='กำลังอ่านข้อมูลทดลอง…';
+ loadCSV(file.file).then(function(rows){
+   var p=values(rows,'Power(kW)'),t=values(rows,'Temp(C)'),v=values(rows,'Voltage(V)'),c=values(rows,'Current(A)'),e=values(rows,'Calculated_Energy(kWh)'),tr=values(rows,'Tuya_Raw_Energy(kWh)'),times=values(rows,'Time_Min');
+   var pmax=Math.max.apply(null,p),tmax=Math.max.apply(null,t),t0=t[0]||0,ed=(Math.max.apply(null,tr)-Math.min.apply(null,tr));
+   set('selectionTitle',CAR_NAMES[car]+' · '+file.label+' · '+(source==='home'?'ไฟบ้าน':'เครื่องปั่นไฟจากแบตเตอรี่'));
+   set('selectionMeta','ช่วงทดลอง '+fmt(Math.max.apply(null,times)-Math.min.apply(null,times),0)+' นาที · '+rows.length+' จุดข้อมูล');
+   set('statTotalEnergy',fmt(e[e.length-1]-e[0],2));set('statAvgPower',fmt(avg(p),2));set('statPeakPower',fmt(pmax,2));set('statTemp',fmt(tmax,0)+'°C');set('statTempRise','เพิ่มจากเริ่มต้น +'+fmt(tmax-t0,0)+'°C');
+   set('statAvgVoltage',fmt(avg(v),0));set('statAvgCurrent',fmt(avg(c),1));set('statTuyaDelta',fmt(ed,2));set('statDuration',fmt(Math.max.apply(null,times)-Math.min.apply(null,times),0));
+   document.getElementById('dataTableBody').innerHTML=rows.map(function(r){return '<tr><td>'+fmt(+r.Time_Min,1)+'</td><td>'+fmt(+r['Voltage(V)'],1)+'</td><td>'+fmt(+r['Current(A)'],2)+'</td><td>'+fmt(+r['Resistance(Ohm)'],2)+'</td><td>'+fmt(+r['Power(kW)'],3)+'</td><td>'+fmt(+r['Temp(C)'],1)+'</td><td>'+fmt(+r['Calculated_Energy(kWh)'],3)+'</td><td>'+fmt(+r['Tuya_Raw_Energy(kWh)'],3)+'</td></tr>';}).join('');
+   drawCharts(rows);document.getElementById('loadingArea').style.display='none';document.getElementById('reportArea').style.display='block';
+   renderCost();
+ }).catch(function(err){document.getElementById('loadingArea').textContent='เกิดข้อผิดพลาด: '+err.message;});
 }
-
-function updateHeader(fileName, currentLabel) {
-  var car = document.getElementById('carSelector').value;
-  var source = document.getElementById('sourceSelector').value;
-  var badge = document.getElementById('headerBadge');
-  if (source === 'home') {
-    badge.textContent = 'ไฟบ้าน'; badge.className = 'badge badge-home';
-  } else {
-    badge.textContent = 'เครื่องปั่นไฟ'; badge.className = 'badge badge-gen';
-  }
-  document.getElementById('headerSource').textContent =
-    SOURCE_NAMES[source] + ' | ' + CAR_NAMES[car] + ' | กระแส ' + currentLabel + ' | ' + fileName;
+function renderCost(){
+ var host=document.getElementById('experimentCompare'),car=document.getElementById('carSelector').value,homeFile=selected('home'),genFile=selected('generator'),amp=parseInt(homeFile.label,10);
+ host.innerHTML='<div class="panel status">กำลังคำนวณค่าใช้จ่าย…</div>';
+ Promise.all([loadCSV(homeFile.file),loadCSV(genFile.file)]).then(function(results){
+   var h=results[0],g=results[1],he=values(h,'Calculated_Energy(kWh)'),ge=values(g,'Calculated_Energy(kWh)'),batteryRemaining={mg:{8:67,10:59,13:47,16:35},rd6:{8:67,10:59,13:48,16:36}}[car][amp],batteryUsed=7.2*(100-batteryRemaining)/100;
+   var base=+(document.getElementById('compareBaseRate').value)||0,ft=+(document.getElementById('compareFtRate').value)||0,vat=+(document.getElementById('compareVatRate').value)||0,rate=(base+ft)*(1+vat/100),homeEnergy=Math.max.apply(null,he)-Math.min.apply(null,he),homeCost=homeEnergy*rate,genCost=batteryUsed*rate,diff=Math.abs(homeCost-genCost),winner=homeCost<=genCost?'ไฟบ้าน':'เครื่องปั่นไฟจากแบตเตอรี่';
+   host.innerHTML='<article class="panel cost-card"><div class="cost-label">ไฟบ้าน · วัดจาก CSV</div><div class="cost-value">'+fmt(homeCost,2)+' บาท</div><div class="cost-foot">'+fmt(homeEnergy,3)+' kWh × '+fmt(rate,4)+' บาท/kWh</div></article><article class="panel cost-card generator"><div class="cost-label">เครื่องปั่นไฟ · ประมาณการ</div><div class="cost-value">'+fmt(genCost,2)+' บาท</div><div class="cost-foot">แบตใช้ประมาณ '+fmt(batteryUsed,3)+' kWh · เหลือ '+batteryRemaining+'%</div></article><article class="panel cost-card saving"><div class="cost-label">ส่วนต่างโดยประมาณ</div><div class="cost-value">'+fmt(diff,2)+' บาท</div><div class="cost-foot">'+winner+' ต่ำกว่า · ทดลอง '+homeFile.label+'</div></article>';
+   if(charts.cost)charts.cost.destroy();
+   charts.cost=new Chart(document.getElementById('chartExperimentalCompare'),{type:'bar',data:{labels:['ไฟบ้าน','เครื่องปั่นไฟจากแบตเตอรี่'],datasets:[{label:'ค่าใช้จ่าย (บาท)',data:[homeCost,genCost],backgroundColor:['#087e68','#ca6b2c'],borderRadius:8,maxBarThickness:48}]},options:Object.assign(chartBase(),{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+fmt(c.parsed.x,2)+' บาท';}}},scales:{x:{beginAtZero:true,title:{display:true,text:'บาท'},ticks:{color:'#637674'},grid:{color:'#edf1ef'}},y:{ticks:{color:'#637674'},grid:{display:false}}}})});
+ }).catch(function(e){host.innerHTML='<div class="panel status">'+e.message+'</div>';});
 }
-
-function parseCSV(text) {
-  var lines = text.trim().split(/\r?\n/);
-  var header = lines[0];
-  var delimiter = header.indexOf('\t') >= 0 ? '\t' : ',';
-  var keys = header.split(delimiter).map(function(k) { return k.trim(); });
-  var rows = [];
-  for (var i = 1; i < lines.length; i++) {
-    var vals = lines[i].split(delimiter);
-    if (vals.length < keys.length) continue;
-    var row = {};
-    for (var j = 0; j < keys.length; j++) { row[keys[j]] = vals[j].trim(); }
-    rows.push(row);
-  }
-  return rows;
-}
-
-function loadData(fileName, currentLabel) {
-  document.getElementById('loadingArea').style.display = 'block';
-  document.getElementById('reportArea').style.display = 'none';
-  updateHeader(fileName, currentLabel);
-
-  fetch('data/' + fileName)
-    .then(function(res) {
-      if (!res.ok) throw new Error('โหลดไฟล์ไม่สำเร็จ ' + fileName);
-      return res.text();
-    })
-    .then(function(text) {
-      var rows = parseCSV(text);
-      var filteredRows = rows.filter(function(row) {
-        return parseFloat(row['Power(kW)']) > 0 && parseFloat(row['Current(A)']) > 0;
-      });
-      if (filteredRows.length === 0) filteredRows = rows;
-
-      var t = [], p = [], tp = [], e = [], c = [], v = [], r = [], tr = [];
-      filteredRows.forEach(function(row) {
-        t.push(Math.round(parseFloat(row['Time_Min'])));
-        v.push(Math.round(parseFloat(row['Voltage(V)'])));
-        c.push(Math.round(parseFloat(row['Current(A)'])));
-        r.push(Math.round(parseFloat(row['Resistance(Ohm)'])));
-        p.push(Math.round(parseFloat(row['Power(kW)']) * 1000) / 1000);
-        tp.push(Math.round(parseFloat(row['Temp(C)'])));
-        e.push(Math.round(parseFloat(row['Calculated_Energy(kWh)']) * 10) / 10);
-        tr.push(Math.round(parseFloat(row['Tuya_Raw_Energy(kWh)']) * 10) / 10);
-      });
-
-      var totalPoints = t.length;
-      var initialTemp = tp[0];
-      var totalEnergy = e[e.length - 1];
-      var peakPower = Math.max.apply(null, p);
-      var avgPower = p.reduce(function(a, b) { return a + b; }, 0) / p.length;
-      var peakTemp = Math.max.apply(null, tp);
-      var maxTempRise = peakTemp - initialTemp;
-      var avgVoltage = v.reduce(function(a, b) { return a + b; }, 0) / v.length;
-      var avgCurrent = c.reduce(function(a, b) { return a + b; }, 0) / c.length;
-      var durationMin = t[t.length - 1];
-      var tuyaDelta = tr[tr.length - 1] - tr[0];
-
-      document.getElementById('statTotalEnergy').textContent = Math.round(totalEnergy * 10) / 10;
-      document.getElementById('statTuyaDelta').textContent = Math.round(tuyaDelta * 10) / 10;
-      document.getElementById('statPeakPower').textContent = Math.round(peakPower * 1000) / 1000;
-      document.getElementById('statAvgPower').textContent = Math.round(avgPower * 1000) / 1000;
-      document.getElementById('statTemp').textContent = peakTemp + '\u00B0C';
-      document.getElementById('statTempRise').textContent = 'เพิ่ม: +' + Math.round(maxTempRise) + '\u00B0C';
-      document.getElementById('statAvgVoltage').textContent = Math.round(avgVoltage);
-      document.getElementById('statAvgCurrent').textContent = Math.round(avgCurrent);
-      document.getElementById('statDuration').textContent = Math.round(durationMin);
-      document.getElementById('statSamples').textContent = 'นาที (' + totalPoints + ' จุด)';
-      document.getElementById('dataLogTitle').textContent = 'ข้อมูลดิบ (ทั้งหมด ' + totalPoints + ' แถว)';
-
-      var tbody = '';
-      for (var i = 0; i < totalPoints; i++) {
-        var tempRise = Math.round(parseFloat(filteredRows[i]['Temp_Rise(C)']));
-        tbody += '<tr>' +
-          '<td>' + t[i] + '</td>' +
-          '<td>' + v[i] + '</td>' +
-          '<td>' + c[i] + '</td>' +
-          '<td>' + r[i] + '</td>' +
-          '<td>' + Math.round(p[i] * 1000) / 1000 + '</td>' +
-          '<td>' + tp[i] + '</td>' +
-          '<td>+' + tempRise + '</td>' +
-          '<td>' + Math.round(e[i] * 10) / 10 + '</td>' +
-          '<td>' + tr[i] + '</td>' +
-          '</tr>';
-      }
-      document.getElementById('dataTableBody').innerHTML = tbody;
-
-      updateCharts(t, p, tp, e, c, v, r, tr);
-
-      document.getElementById('loadingArea').style.display = 'none';
-      document.getElementById('reportArea').style.display = 'block';
-      initAnimations();
-    })
-    .catch(function(err) {
-      document.getElementById('loadingArea').innerHTML =
-        '<div style="color:#ff6b6b;font-size:16px;">เกิดข้อผิดพลาด: ' + err.message + '</div>';
-    });
-}
-
-function updateCharts(t, p, tp, e, c, v, r, tr) {
-  Object.keys(charts).forEach(function(key) { charts[key].destroy(); });
-
-  Chart.defaults.color = '#8892b0';
-  Chart.defaults.borderColor = '#2a2a4a';
-
-  var baseOpts = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    animation: { duration: 1500, easing: 'easeInOutQuart' },
-    plugins: {
-      legend: { labels: { color: '#ccd6f6', padding: 15 } },
-      tooltip: {
-        backgroundColor: '#1a1a2e', titleColor: '#00d4ff', bodyColor: '#ccd6f6',
-        borderColor: '#2a2a4a', borderWidth: 1, padding: 10,
-        callbacks: { label: function(context) {
-          var label = context.dataset.label || '';
-          return label + ': ' + (Math.round(context.parsed.y * 10) / 10);
-        } }
-      }
-    }
-  };
-
-  function xScale() {
-    return { title: { display: true, text: 'เวลา (นาที)', color: '#8892b0' }, ticks: { color: '#8892b0' }, grid: { color: '#1e1e3a' } };
-  }
-  function yScale(label, color) {
-    return { type: 'linear', position: 'left', title: { display: true, text: label, color: color || '#8892b0' }, ticks: { color: color || '#8892b0' }, grid: { color: '#1e1e3a' } };
-  }
-
-  charts.powerTemp = new Chart(document.getElementById('chartPowerTemp'), {
-    type: 'line',
-    data: { labels: t, datasets: [
-      { label: 'กำลังไฟฟ้า (kW)', data: p, borderColor: '#00d4ff', backgroundColor: 'rgba(0,212,255,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
-      { label: 'อุณหภูมิ (\u00b0C)', data: tp, borderColor: '#ff6b6b', backgroundColor: 'rgba(255,107,107,0.1)', borderWidth: 2, borderDash: [5, 3], fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y1' }
-    ] },
-    options: Object.assign({}, baseOpts, {
-      scales: {
-        x: xScale(),
-        y: { type: 'linear', position: 'left', title: { display: true, text: 'กำลังไฟฟ้า (kW)', color: '#00d4ff' }, ticks: { color: '#00d4ff' }, grid: { color: '#1e1e3a' } },
-        y1: { type: 'linear', position: 'right', title: { display: true, text: 'อุณหภูมิ (\u00b0C)', color: '#ff6b6b' }, ticks: { color: '#ff6b6b' }, grid: { drawOnChartArea: false } }
-      }
-    })
-  });
-
-  charts.voltage = new Chart(document.getElementById('chartVoltage'), {
-    type: 'line',
-    data: { labels: t, datasets: [{ label: 'แรงดันไฟฟ้า (V)', data: v, borderColor: '#6bcb77', backgroundColor: 'rgba(107,203,119,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
-    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('แรงดัน (V)', '#6bcb77') } })
-  });
-
-  charts.current = new Chart(document.getElementById('chartCurrent'), {
-    type: 'line',
-    data: { labels: t, datasets: [{ label: 'กระแสไฟฟ้า (A)', data: c, borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
-    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('กระแส (A)', '#a855f7') } })
-  });
-
-  charts.energy = new Chart(document.getElementById('chartEnergy'), {
-    type: 'line',
-    data: { labels: t, datasets: [{ label: 'พลังงานสะสม (kWh)', data: e, borderColor: '#ffd93d', backgroundColor: 'rgba(255,217,61,0.15)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
-    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('พลังงาน (kWh)', '#ffd93d') } })
-  });
-
-  charts.resistance = new Chart(document.getElementById('chartResistance'), {
-    type: 'line',
-    data: { labels: t, datasets: [{ label: 'ความต้านทาน (\u2126)', data: r, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0 }] },
-    options: Object.assign({}, baseOpts, { scales: { x: xScale(), y: yScale('ความต้านทาน (\u2126)', '#f97316') } })
-  });
-
-  var eNorm = e.map(function(val) { return Math.round((val - e[0]) * 10) / 10; });
-  var trNorm = tr.map(function(val) { return Math.round((val - tr[0]) * 10) / 10; });
-
-  charts.energyCompare = new Chart(document.getElementById('chartEnergyCompare'), {
-    type: 'line',
-    data: { labels: t, datasets: [
-      { label: 'พลังงานคำนวณ (kWh)', data: eNorm, borderColor: '#ffd93d', backgroundColor: 'rgba(255,217,61,0.1)', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
-      { label: 'พลังงาน Tuya Raw (kWh)', data: trNorm, borderColor: '#4d96ff', backgroundColor: 'rgba(77,150,255,0.1)', borderWidth: 2, borderDash: [5, 3], fill: fal<section class="section power-compare cost-compare" id="cost-comparison">
-  <h2>ค่าใช้จ่าย: ไฟบ้านเทียบกับเครื่องปั่นไฟ</h2>
-  <p class="cost-intro" id="compareIntro">เลือกรุ่นรถและกระแสจากตัวเลือกด้านบน เพื่อดูค่าใช้จ่ายจากผลทดลองจริง</p>
-  <details class="rate-settings"><summary>ปรับอัตราค่าไฟ</summary><div class="params-panel">
-    <div class="param-item"><label for="compareBaseRate">ค่าไฟฐาน (บาท/kWh)</label><input id="compareBaseRate" type="number" value="4.2218" step="0.0001" min="0"></div>
-    <div class="param-item"><label for="compareFtRate">ค่า Ft (บาท/kWh)</label><input id="compareFtRate" type="number" value="0" step="0.01"></div>
-    <div class="param-item"><label for="compareVatRate">VAT (%)</label><input id="compareVatRate" type="number" value="7" step="0.1" min="0"></div>
-  </div></details>
-  <div id="experimentCompare" class="cost-results" aria-live="polite"><div class="loading">กำลังอ่านข้อมูลทดลอง…</div></div>
-  <div class="chart-section cost-chart" style="opacity:1;transform:none"><h2>เทียบค่าใช้จ่ายต่อการทดลอง</h2><div class="chart-wrapper"><canvas id="chartExperimentalCompare"></canvas></div></div>
-  <details class="cost-details"><summary>ดูรายละเอียดและวิธีคำนวณ</summary><div id="compareDetails" class="data-note">คำนวณจากพลังงานที่วัดได้ และประมาณพลังงานแบตเตอรี่ที่ใช้ไป</div></details>
-  <p class="cost-footnote">เครื่องปั่นไฟเป็นค่าประมาณจากพลังงานแบตเตอรี่ที่ใช้ไป ค่าไฟจริงอาจต่างตามอัตราค่าไฟและประสิทธิภาพการชาร์จแบต</p>
-</section>
-<script>
-(function(){
-  var compareChart=null;
-  function selectedFile(source){
-    var car=document.getElementById('carSelector').value,current=document.getElementById('currentSelector').value,list=CSV_FILES[source][car];
-    return list.find(function(x){return x.file===current;})||list[0];
-  }
-  function readExperiment(source){
-    var item=selectedFile(source);
-    return fetch('data/'+item.file).then(function(res){if(!res.ok)throw new Error(item.file);return res.text();}).then(function(text){
-      var rows=parseCSV(text).filter(function(r){return parseFloat(r['Power(kW)'])>0&&parseFloat(r['Current(A)'])>0;});
-      if(!rows.length)rows=parseCSV(text);
-      var power=rows.map(function(r){return parseFloat(r['Power(kW)'])||0;}),energy=rows.map(function(r){return parseFloat(r['Calculated_Energy(kWh)'])||0;}),voltage=rows.map(function(r){return parseFloat(r['Voltage(V)'])||0;}),temps=rows.map(function(r){return parseFloat(r['Temp(C)'])||0;}),times=rows.map(function(r){return parseFloat(r['Time_Min'])||0;});
-      return {label:item.label,duration:Math.max.apply(null,times)-Math.min.apply(null,times),energy:Math.max.apply(null,energy)-Math.min.apply(null,energy),avgPower:power.reduce(function(a,b){return a+b;},0)/power.length,peakPower:Math.max.apply(null,power),avgVoltage:voltage.reduce(function(a,b){return a+b;},0)/voltage.length,peakTemp:Math.max.apply(null,temps)};
-    });
-  }
-  function fmt(n,d){return Number.isFinite(n)?n.toFixed(d):'—';}
-  function render(){
-    var host=document.getElementById('experimentCompare');host.innerHTML='<div class="loading">กำลังอ่านข้อมูลทดลอง…</div>';
-    Promise.all([readExperiment('home'),readExperiment('generator')]).then(function(a){
-      var home=a[0],gen=a[1],car=document.getElementById('carSelector').value,amp=parseInt(home.label,10),remaining={mg:{8:67,10:59,13:47,16:35},rd6:{8:67,10:59,13:48,16:36}}[car][amp],batteryUsed=7.2*(100-remaining)/100;
-      var base=parseFloat(document.getElementById('compareBaseRate').value)||0,ft=parseFloat(document.getElementById('compareFtRate').value)||0,vat=parseFloat(document.getElementById('compareVatRate').value)||0,rate=(base+ft)*(1+vat/100),homeCost=home.energy*rate,batteryCost=batteryUsed*rate,diff=Math.abs(homeCost-batteryCost),cheaper=homeCost<=batteryCost?'ไฟบ้าน':'เครื่องปั่นไฟจากแบตเตอรี่';
-      host.innerHTML='<article class="cost-option home-option"><div class="cost-label">ไฟบ้าน</div><div class="cost-amount">'+fmt(homeCost,2)+' <span>บาท</span></div><div class="cost-caption">วัดได้ '+fmt(home.energy,3)+' kWh</div></article><article class="cost-option generator-option"><div class="cost-label">เครื่องปั่นไฟจากแบตเตอรี่</div><div class="cost-amount">'+fmt(batteryCost,2)+' <span>บาท</span></div><div class="cost-caption">แบตใช้ไปประมาณ '+fmt(batteryUsed,3)+' kWh</div></article><article class="cost-verdict"><div class="cost-label">ส่วนต่างโดยประมาณ</div><div class="cost-amount">'+fmt(diff,2)+' <span>บาท</span></div><div class="cost-caption">'+cheaper+' มีค่าใช้จ่ายต่ำกว่า · '+fmt(rate,4)+' บาท/kWh</div></article>';
-      document.getElementById('compareIntro').textContent='ผลทดลองจริงของ '+(CAR_NAMES[car]||'')+' ที่กระแส '+home.label+' (ประมาณ '+fmt(home.duration,0)+' นาที)';
-      document.getElementById('compareDetails').innerHTML='<p><strong>ไฟบ้าน:</strong> '+fmt(home.energy,3)+' kWh × '+fmt(rate,4)+' บาท/kWh = '+fmt(homeCost,2)+' บาท</p><p><strong>เครื่องปั่นไฟ:</strong> แบตเตอรี่ 7.2 kWh เหลือ '+remaining+'% จึงประเมินว่าใช้ไป '+fmt(batteryUsed,3)+' kWh × '+fmt(rate,4)+' บาท/kWh = '+fmt(batteryCost,2)+' บาท</p><p>ข้อมูลประกอบจาก CSV — ไฟบ้าน: กำลังเฉลี่ย '+fmt(home.avgPower,3)+' kW, สูงสุด '+fmt(home.peakPower,3)+' kW, แรงดันเฉลี่ย '+fmt(home.avgVoltage,1)+' V, อุณหภูมิสูงสุด '+fmt(home.peakTemp,1)+' °C; เครื่องปั่นไฟจ่ายพลังงาน AC '+fmt(gen.energy,3)+' kWh ใน '+fmt(gen.duration,0)+' นาที</p>';
-      if(compareChart)compareChart.destroy();
-      compareChart=new Chart(document.getElementById('chartExperimentalCompare'),{type:'bar',data:{labels:['ไฟบ้าน','เครื่องปั่นไฟจากแบตเตอรี่'],datasets:[{label:'ค่าใช้จ่าย (บาท)',data:[homeCost,batteryCost],backgroundColor:['rgba(107,203,119,.78)','rgba(255,159,67,.78)'],borderColor:['#6bcb77','#ff9f43'],borderWidth:2,borderRadius:8}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+fmt(c.parsed.x,2)+' บาท';}},backgroundColor:'#1a1a2e',titleColor:'#00d4ff',bodyColor:'#ccd6f6'}},scales:{x:{beginAtZero:true,title:{display:true,text:'บาท',color:'#8892b0'},ticks:{color:'#8892b0'},grid:{color:'#2a2a4a'}},y:{ticks:{color:'#ccd6f6',font:{size:13}},grid:{display:false}}}}});
-    }).catch(function(err){host.innerHTML='<div class="data-note">โหลดข้อมูลเปรียบเทียบไม่สำเร็จ กรุณาลองใหม่ ('+String(err.message||err)+')</div>';});
-  }
-  document.getElementById('sourceSelector').addEventListener('change',render);document.getElementById('carSelector').addEventListener('change',render);document.getElementById('currentSelector').addEventListener('change',render);
-  ['compareBaseRate','compareFtRate','compareVatRate'].forEach(function(id){document.getElementById(id).addEventListener('input',render);});render();
-})();
+document.getElementById('sourceSelector').addEventListener('change',function(){populateCurrent();renderData();});
+document.getElementById('carSelector').addEventListener('change',function(){populateCurrent();renderData();});
+document.getElementById('currentSelector').addEventListener('change',renderData);
+['compareBaseRate','compareFtRate','compareVatRate'].forEach(function(id){document.getElementById(id).addEventListener('input',renderCost);});
+window.addEventListener('DOMContentLoaded',function(){populateCurrent();renderData();});
 </script>
-
-arName=CAR_NAMES[document.getElementById('carSelector').value]||'';
-      document.querySelector('#cost-comparison > p').textContent='ผลทดลองจริงของ '+carName+' ที่กระแส '+home.label+' โดยใช้ข้อมูลจากไฟล์ CSV ของไฟบ้านและเครื่องปั่นไฟจากแบตเตอรี่';
-      if(compareChart)compareChart.destroy();
-      compareChart=new Chart(document.getElementById('chartExperimentalCompare'),{
-        type:'bar',
-        data:{labels:['ค่าไฟต่อการทดลอง (บาท)'],datasets:[
-          {label:'ไฟบ้าน',data:[homeCost],backgroundColor:'rgba(107,203,119,.7)',borderColor:'#6bcb77',borderWidth:2},
-          {label:'เครื่องปั่นไฟจากแบตเตอรี่',data:[batteryCost],backgroundColor:'rgba(255,159,67,.7)',borderColor:'#ff9f43',borderWidth:2}
-        ]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#ccd6f6'}},tooltip:{backgroundColor:'#1a1a2e',titleColor:'#00d4ff',bodyColor:'#ccd6f6'}},scales:{x:{ticks:{color:'#8892b0'},grid:{color:'#1e1e3a'}},y:{beginAtZero:true,ticks:{color:'#8892b0'},grid:{color:'#1e1e3a'}}}}
-      });
-    }).catch(function(err){
-      host.innerHTML='<div class="data-note">โหลดข้อมูลเปรียบเทียบไม่สำเร็จ กรุณาลองใหม่ ('+String(err.message||err)+')</div>';
-    });
-  }
-  document.getElementById('sourceSelector').addEventListener('change',render);
-  document.getElementById('carSelector').addEventListener('change',render);
-  document.getElementById('currentSelector').addEventListener('change',render);
-  ['compareBaseRate','compareFtRate','compareVatRate'].forEach(function(id){document.getElementById(id).addEventListener('input',render);});
-  render();
-})();
-</script>
-
-<section class="report-embed" id="analysis-report">
-  <div class="report-embed-head">
-    <h2>📊 วิเคราะห์ Loss / แบต</h2>
-    <a class="report-embed-link" href="./analysis.html?v=98546003" target="_blank" rel="noopener">เปิดเต็มหน้า ↗</a>
-  </div>
-  <iframe src="./analysis.html?v=98546003" title="วิเคราะห์ Loss และแบตเตอรี่ EV" loading="lazy"></iframe>
-</section>
-
-<section class="report-embed" id="summary-report">
-  <div class="report-embed-head">
-    <h2>📋 สรุปผลการวิจัยการชาร์จรถยนต์ไฟฟ้า</h2>
-    <a class="report-embed-link" href="https://nawapon1412-arch.github.io/Test-EV_Changer/index.html?v=0e4ebab5" target="_blank" rel="noopener">เปิดเต็มหน้า ↗</a>
-  </div>
-  <iframe src="https://nawapon1412-arch.github.io/Test-EV_Changer/index.html?v=0e4ebab5" title="สรุปผลการวิจัยการชาร์จรถยนต์ไฟฟ้า" loading="lazy"></iframe>
-</section>
 </body>
 </html>

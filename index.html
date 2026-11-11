@@ -67,7 +67,11 @@ footer{border-top:1px solid var(--line);padding:26px 0 38px;color:var(--muted);f
 </section>
 
 <section class="section" id="ต้นทุน">
-<div class="section-head"><div><div class="section-kicker">02 / เปรียบเทียบต้นทุน</div><h2>ค่าใช้จ่ายต่อการทดลอง</h2><p class="section-intro">เทียบพลังงานจากมิเตอร์ไฟบ้านกับพลังงานแบตเตอรี่ที่ใช้ไปกับเครื่องปั่นไฟ สำหรับรถและกระแสที่เลือกด้านบน</p></div></div>
+<div class="section-head"><div><div class="section-kicker">02 / เปรียบเทียบต้นทุน</div><h2>ค่าใช้จ่ายต่อการทดลอง</h2><p class="section-intro">เลือกกรณีทดลองตรงนี้ได้เลย แยกจากตัวเลือกกราฟด้านบน</p></div></div>
+<div class="panel controls" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:14px">
+<div class="field"><label for="compareCarSelector">รุ่นรถที่ต้องการเปรียบเทียบ</label><select id="compareCarSelector"><option value="mg">MG ZS EV</option><option value="rd6">RD6 Riddara</option></select></div>
+<div class="field"><label for="compareCurrentSelector">กระแสชาร์จ</label><select id="compareCurrentSelector"><option value="8A">8A</option><option value="10A">10A</option><option value="13A">13A</option><option value="16A">16A</option></select></div>
+</div>
 <details class="cost-settings"><summary>ปรับอัตราค่าไฟที่ใช้คำนวณ</summary><div class="detail-body"><div class="rate-fields">
 <div class="field"><label for="compareBaseRate">ค่าไฟฐาน (บาท/kWh)</label><input id="compareBaseRate" type="number" value="4.2218" min="0" step="0.0001"></div>
 <div class="field"><label for="compareFtRate">ค่า Ft (บาท/kWh)</label><input id="compareFtRate" type="number" value="0" step="0.01"></div>
@@ -153,7 +157,7 @@ function renderData(){
  }).catch(function(err){document.getElementById('loadingArea').textContent='เกิดข้อผิดพลาด: '+err.message;});
 }
 function renderCost(){
- var host=document.getElementById('experimentCompare'),car=document.getElementById('carSelector').value,homeFile=selected('home'),genFile=selected('generator'),amp=parseInt(homeFile.label,10);
+ var host=document.getElementById('experimentCompare'),car=document.getElementById('compareCarSelector').value,selectedAmp=document.getElementById('compareCurrentSelector').value,homeFile=CSV_FILES.home[car].find(function(x){return x.label===selectedAmp;})||CSV_FILES.home[car][0],genFile=CSV_FILES.generator[car].find(function(x){return x.label===selectedAmp;})||CSV_FILES.generator[car][0],amp=parseInt(selectedAmp,10);
  host.innerHTML='<div class="panel status">กำลังคำนวณค่าใช้จ่าย…</div>';
  Promise.all([loadCSV(homeFile.file),loadCSV(genFile.file)]).then(function(results){
    var h=results[0],g=results[1],he=values(h,'Calculated_Energy(kWh)'),ge=values(g,'Calculated_Energy(kWh)'),batteryRemaining={mg:{8:67,10:59,13:47,16:35},rd6:{8:67,10:59,13:48,16:36}}[car][amp],batteryUsed=7.2*(100-batteryRemaining)/100;
@@ -166,6 +170,7 @@ function renderCost(){
 document.getElementById('sourceSelector').addEventListener('change',function(){populateCurrent();renderData();});
 document.getElementById('carSelector').addEventListener('change',function(){populateCurrent();renderData();});
 document.getElementById('currentSelector').addEventListener('change',renderData);
+['compareCarSelector','compareCurrentSelector'].forEach(function(id){document.getElementById(id).addEventListener('change',renderCost);});
 ['compareBaseRate','compareFtRate','compareVatRate'].forEach(function(id){document.getElementById(id).addEventListener('input',renderCost);});
 window.addEventListener('DOMContentLoaded',function(){populateCurrent();renderData();});
 </script>

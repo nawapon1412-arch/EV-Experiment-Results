@@ -47,8 +47,12 @@ footer{border-top:1px solid var(--line);padding:26px 0 38px;color:var(--muted);f
 <div class="panel kpi"><div class="kpi-label">อุณหภูมิสูงสุด</div><div class="kpi-value" id="statTemp">—</div><div class="kpi-unit" id="statTempRise">ระหว่างการทดลอง</div></div>
 </div>
 <div class="chart-grid">
-<article class="panel chart-panel"><h3 class="chart-title">กำลังไฟระหว่างชาร์จ</h3><p class="chart-subtitle">กำลังไฟที่วัดได้ตามเวลา</p><div class="chartbox"><canvas id="chartPower"></canvas></div></article>
-<article class="panel chart-panel"><h3 class="chart-title">พลังงานสะสม</h3><p class="chart-subtitle">เปรียบเทียบค่าคำนวณกับมิเตอร์ Tuya</p><div class="chartbox"><canvas id="chartEnergy"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">กำลังไฟระหว่างชาร์จ</h3><p class="chart-subtitle">กำลังไฟที่วัดได้ตามเวลา · kW</p><div class="chartbox"><canvas id="chartPower"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">พลังงานสะสม</h3><p class="chart-subtitle">เทียบค่าคำนวณกับมิเตอร์ Tuya · kWh</p><div class="chartbox"><canvas id="chartEnergy"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">แรงดันไฟฟ้า</h3><p class="chart-subtitle">การเปลี่ยนแปลงแรงดันระหว่างชาร์จ · V</p><div class="chartbox"><canvas id="chartVoltage"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">กระแสไฟฟ้า</h3><p class="chart-subtitle">กระแสที่วัดได้ระหว่างชาร์จ · A</p><div class="chartbox"><canvas id="chartCurrent"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">อุณหภูมิ</h3><p class="chart-subtitle">อุณหภูมิจริงและอุณหภูมิที่เพิ่มขึ้น · °C</p><div class="chartbox"><canvas id="chartTemperature"></canvas></div></article>
+<article class="panel chart-panel"><h3 class="chart-title">ความต้านทาน</h3><p class="chart-subtitle">ค่าความต้านทานที่บันทึกในชุดข้อมูล · Ω</p><div class="chartbox"><canvas id="chartResistance"></canvas></div></article>
 </div>
 <details style="margin-top:14px"><summary>ข้อมูลละเอียดของชุดทดลองนี้</summary><div class="detail-body">
 <div class="kpis" style="margin:0 0 14px">
@@ -120,9 +124,18 @@ function chartBase(){return{responsive:true,maintainAspectRatio:false,interactio
 function drawCharts(rows){
  Object.keys(charts).forEach(function(k){charts[k].destroy();});
  var time=values(rows,'Time_Min'),power=values(rows,'Power(kW)'),energy=values(rows,'Calculated_Energy(kWh)'),tuya=values(rows,'Tuya_Raw_Energy(kWh)');
- charts.power=new Chart(document.getElementById('chartPower'),{type:'line',data:{labels:time,datasets:[{label:'กำลังไฟ (kW)',data:power,borderColor:'#087e68',backgroundColor:'#087e6814',fill:true,borderWidth:2,tension:.25,pointRadius:0}]},options:chartBase()});
+ function lineChart(id,datasets,beginAtZero){
+   var options=chartBase();
+   options.scales.y.beginAtZero=beginAtZero;
+   charts[id]=new Chart(document.getElementById(id==='temperature'?'chartTemperature':'chart'+id.charAt(0).toUpperCase()+id.slice(1)),{type:'line',data:{labels:time,datasets:datasets.map(function(d){return Object.assign({borderWidth:2,tension:.25,pointRadius:0,fill:false},d);})},options:options});
+ }
+ lineChart('power',[{label:'กำลังไฟ (kW)',data:power,borderColor:'#087e68',backgroundColor:'#087e6814',fill:true}],true);
  var energy0=energy[0]||0,tuya0=tuya[0]||0;
- charts.energy=new Chart(document.getElementById('chartEnergy'),{type:'line',data:{labels:time,datasets:[{label:'คำนวณ (kWh)',data:energy.map(function(v){return v-energy0;}),borderColor:'#087e68',borderWidth:2,tension:.25,pointRadius:0},{label:'Tuya (kWh)',data:tuya.map(function(v){return v-tuya0;}),borderColor:'#4378a4',borderDash:[5,4],borderWidth:2,tension:.25,pointRadius:0}]},options:chartBase()});
+ lineChart('energy',[{label:'คำนวณ (kWh)',data:energy.map(function(v){return v-energy0;}),borderColor:'#087e68'},{label:'Tuya (kWh)',data:tuya.map(function(v){return v-tuya0;}),borderColor:'#4378a4',borderDash:[5,4]}],true);
+ lineChart('voltage',[{label:'แรงดัน (V)',data:values(rows,'Voltage(V)'),borderColor:'#4378a4'}],false);
+ lineChart('current',[{label:'กระแส (A)',data:values(rows,'Current(A)'),borderColor:'#7c61a8'}],false);
+ lineChart('temperature',[{label:'อุณหภูมิ (°C)',data:values(rows,'Temp(C)'),borderColor:'#ca6b2c'},{label:'อุณหภูมิเพิ่ม (°C)',data:values(rows,'Temp_Rise(C)'),borderColor:'#d9a441',borderDash:[5,4]}],false);
+ lineChart('resistance',[{label:'ความต้านทาน (Ω)',data:values(rows,'Resistance(Ohm)'),borderColor:'#71815b'}],false);
 }
 function renderData(){
  var file=selected(document.getElementById('sourceSelector').value),source=document.getElementById('sourceSelector').value,car=document.getElementById('carSelector').value;
